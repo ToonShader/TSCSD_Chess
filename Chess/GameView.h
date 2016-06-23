@@ -6,7 +6,6 @@
 #include "GameLogic.h"
 #include "xnacollision.h"
 #include "GeometryGenerator.h"
-//#include "Common.h"
 
 class GameLogic;
 
@@ -25,18 +24,6 @@ struct Mesh
 	std::vector<UINT> Indices;
 };
 
-/*struct ObjectInfo
-{
-	Object** BlackObjects;
-	Object** RedObjects;
-	Object** BoardObjects;
-	UINT numBlack;
-	UINT numRed;
-	UINT numBoards;
-};*/
-
-//class MenuView;
-
 class RenderTarget : private D3DAppControl
 {
 public:
@@ -47,10 +34,7 @@ public:
 
 	bool Init();
 	void OnResize();
-	//void Reset();
-	//game logic maintains current player
-	//void AttachGameLogic(GameLogic& gameLogic);
-	//bool AttachViews(int numViews, bool player, const GameView** gameViews);
+	void a() {mSwapChain->SetFullscreenState(false,0);}
 	MenuDef::MenuType GetMenuItem();
 	void MenuOpen(QuickDef::Player player, MenuDef::MenuLevel);
 	void MenuClose();
@@ -61,15 +45,7 @@ public:
 	void UpdateScene(float deltaTime, CXMMATRIX viewProj);
 	void DrawScene(ObjectInfo& objects);
 
-	//controls all mouse input
-	//virtual void MouseInput(WPARAM btnState, int x, int y) = 0;
-	//void OnMouseDown(WPARAM btnState, int x, int y);
-	//void OnMouseUp	(WPARAM btnState, int x, int y);
-	//void OnMouseMove(WPARAM btnState, int x, int y);
-
 private:
-
-	//friend PlayerView;
 	void BuildBlankBuffer();
 	void BuildGeometryBuffers();
 	void BuildMenuBuffers();
@@ -77,17 +53,11 @@ private:
 	void BuildVertexLayout();
 	void BuildBoxExtents(GeometryGenerator::MeshData& meshData, XNA::AxisAlignedBox& boxData);
 
-//protected:
-
-	//void MenuPick();
 	//used to send events to the game logic
-	void SendEvent(Event& data);//why
+	void SendEvent(Event& data);
 
-	//virtual void Process();
 	void GetDrawInfo(UINT& vertexOffset, UINT& indexOffset, UINT& indexCount, Object* object, Menu* menuItem);
 	Mesh& GetMeshInfo(QuickDef::MoveType type, XNA::AxisAlignedBox** box);
-
-	//void SaveGame(bool replay);
 
 	//Menu functions
 	void MenuProcess(Menu* menuItem);
@@ -100,10 +70,6 @@ private:
 	MenuDef::MenuType mSelectedMenu;
 	UINT mMenuListCount;
 	MenuDef::MenuLevel mMenuLevel;
-	//static int mReferences;
-
-	//static bool mInitialized;
-//	static int	mViews;
 
 	ID3D11Buffer* mTestVertexBuffer;
 	ID3D11Buffer* mTestIndexBuffer;
@@ -137,8 +103,6 @@ private:
 	ID3D11Buffer* mDebugIndexBuffer;
 
 	UINT mDebugIndexCount;
-
-	//UINT mMenuIndexCount;
 
 	UINT mMenuBoxIndexOffset;
 	UINT mMenuBoxIndexCount;
@@ -235,30 +199,20 @@ private:
 	ID3DX11EffectVectorVariable* mFXColorSpecial;
 	ID3DX11EffectVectorVariable* mFXColorRandom;
 
-
-
-//protected:
 	GameLogic* mGameLogic;
-	//static MenuView* mMenu;
+
 	bool mMenued;
 	bool mMenuCloseable;
 	bool mWireFrame;
 	QuickDef::Player mRankingPlayer;
 
-	//float mTheta;
-	//float mPhi;
-	//float mRadius;
-
-	//each view will maintain its camera position
-	XMFLOAT4X4 mView;//why?---------------------------------------------------------------------
-	//XMVECTOR mViewWorld;
+	// Each view will maintain its camera position
+	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
 
-	XMFLOAT4 mColorBlack;//why??---------------------------------------------------------------
+	XMFLOAT4 mColorBlack;
 	XMFLOAT4 mColorRed;
 	XMFLOAT4 mColorHighlight;
-
-	//Object* mSelectedObject;
 };
 
 class GameView
@@ -300,8 +254,6 @@ private:
 private:
 	static RenderTarget* mRenderTarget;
 	static GameLogic* mGameLogic;
-	//static MenuView* mMenuView;
-
 
 protected:
 	Object* mSelected;
@@ -326,7 +278,6 @@ public:
 	void Reset();
 	void SaveGame();
 	void LogPromotion(QuickDef::MoveType piece);
-	//void MouseInput(UINT msg, WPARAM btnState, int x, int y);
 
 private:
 	void OnMouseDown(WPARAM btnState, int x, int y);
@@ -334,15 +285,13 @@ private:
 	void OnMouseMove(WPARAM btnState, int x, int y);
 	void CreateBuffer(int sx, int sy);
 
-private://buffer creation purposed only
+private:// TODO: Remove: buffer creation purposes only?
 	static UINT mReferences;
 	static std::fstream* mMoveFile;
 	std::vector<Vertex> testVertices;
 	UINT testSize;
 	UINT test;
 	POINT mLastDrawPos;
-
-
 };
 
 class ReplayView : public GameView
@@ -354,8 +303,6 @@ public:
 	void LogMove(UINT x, UINT z, UINT nx, UINT nz, Event& data, bool promotion);
 	void Reset();
 
-
-	//void MouseInput(WPARAM btnState, int x, int y);
 	void QuickRun();
 
 private:
@@ -367,37 +314,6 @@ private:
 
 private:
 	static std::fstream* mReplayFile;
-	//bool mMenued;
 };
-
-/*class MenuManager// : public GameView
-{
-	MenuManager(QuickDef::MenuLevel currLevel);
-	~MenuManager();
-
-	//void MouseInput(WPARAM btnState, int x, int y);
-	void Open();
-	void Close();
-	void Draw(ID3D11DeviceContext* immediateContext);
-	void UpdateLevel(QuickDef::MenuLevel level);
-
-	UINT GetMenuListNumber();
-	Menu** GetMenus();
-
-private:
-	void CreateMenus(QuickDef::MenuLevel level);
-
-private:
-	UINT mMenuListNumber;
-	Menu* mCurrMenuList[4];
-	Menu* mFullMenuList[6];
-
-	//void OnMouseDown(WPARAM btnState, int x, int y);
-	//void OnMouseUp	(WPARAM btnState, int x, int y);
-	//void OnMouseMove(WPARAM btnState, int x, int y);
-};*/
-
-
-
 
 #endif

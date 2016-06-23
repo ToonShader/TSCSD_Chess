@@ -4,20 +4,13 @@
 // Transforms and colors geometry.
 //***************************************************************************************
 
-cbuffer cbPerObject//------------------------------create random colors????
+cbuffer cbPerObject
 {
-	float4x4 gWorldViewProj; //test its globalness---------------------------
+	float4x4 gWorldViewProj; 
 	float4 gColorBase;
 	float4 gColorSpecial;
 	float4 gColorRandom;
 };
-
-/*RasterizerState WF
-{
-	FillMode = Wireframe;
-	CullMode = None;
-	FrontCounterClockwise = false;
-};*/
 
 struct VertexIn
 {
@@ -34,7 +27,7 @@ float Random( float2 p )
 
 
 
-struct VertexOut// can these be joined???------------------------------------
+struct VertexOut
 {
 	float4 PosH  : SV_POSITION;
     float4 Color : COLOR;
@@ -43,9 +36,6 @@ struct VertexOut// can these be joined???------------------------------------
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
-
-	//vin.PosL.xy += 0.5f*sin(vin.PosL.x)*sin(3.0f*gTime);
-	//vin.PosL.z *= 0.6f + 0.4f*sin(2.0f*gTime);
 
 	// Transform to homogeneous clip space.
 	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
@@ -56,12 +46,8 @@ VertexOut VS(VertexIn vin)
     return vout;
 }
 
-float4 PS(VertexOut pin) : SV_Target//------------------return required????
+float4 PS(VertexOut pin) : SV_Target
 {
-	if (pin.Color[2] == 0.0f || pin.Color[1] == 0.0f)
-	{
-//		return pin.Color;
-	}
 	float2 f2 = float2(pin.PosH[1], pin.PosH[2]);
 	float rand = Random(f2);
 	float4 colorRandom = float4(0.01f * rand, 0.1f * rand, 0.1f * rand, 0.0f);
@@ -73,10 +59,8 @@ technique11 ColorTech
 {
     pass P0
     {
-		//SetRasterizerState(WF);
         SetVertexShader( CompileShader( vs_4_0, VS() ) );//changed from 5_0
 		SetGeometryShader( NULL );
         SetPixelShader( CompileShader( ps_4_0, PS() ) );//changed from 5_0
-
     }
 }

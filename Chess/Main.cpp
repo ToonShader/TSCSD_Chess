@@ -1,8 +1,4 @@
-//#include "702/702_Create.h"
-//#include "Main.h"
 #include "Chess.h"
-//#include "GameView.h"
-//#include "GameLogic.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
@@ -14,17 +10,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 	Chess chessGame(hInstance);
 	if ( ! chessGame.Init())
 	{
-		//something
+		// TODO: handle init error
 	}
 	else
 		return chessGame.Run();
-
-	//if ( ! thisapp.Init() )
-	//{
-		//return 0;
-	//}
-
-	//thisapp.NoFullscreen();
-	//return thisapp.Run();
 
 }

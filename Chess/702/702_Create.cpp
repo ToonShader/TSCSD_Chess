@@ -9,16 +9,15 @@
 
 #include "702_Create.h"
 #include <WindowsX.h>
-#include <sstream>// look for .str() and other string swap items
-//#include <string>
+#include <sstream>
 
 
-namespace//perhaps a way to do this without namespace, though it may allow it to be used outside the file
+namespace
 {
 	D3DAppControl* h_d3dAppCtrl = 0;
 }
 
-LRESULT CALLBACK MainWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)//still sketchy on mutiple wind procs/msg procs?
+LRESULT CALLBACK MainWndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)// TODO: Learn: still sketchy on mutiple wind procs/msg procs?
 {
 	return h_d3dAppCtrl->MsgProc(hWnd, Msg, wParam, lParam);
 }
@@ -52,9 +51,11 @@ D3DAppControl::D3DAppControl(HINSTANCE hInstance)
 
 D3DAppControl::~D3DAppControl()
 {
+	//mSwapChain->SetFullscreenState(false, nullptr);	
+	
 	ReleaseCOM(md3dDevice);
 
-	if (md3dImmediateContext)//----------------------------------why do we restore default settings
+	if (md3dImmediateContext)// TODO: Learn: why do we restore default settings
 		md3dImmediateContext->ClearState();
 
 	ReleaseCOM(md3dImmediateContext);
@@ -81,13 +82,13 @@ float D3DAppControl::getAspectRatio() const
 
 int D3DAppControl::Run()
 {
-	MSG Msg = {0}; // same as ZeroMemory() macro??-------
+	MSG Msg = {0};
 
 	mTimer.Reset();
 
 	while (Msg.message != WM_QUIT)
 	{
-		if (PeekMessage(&Msg, 0, 0, 0, PM_REMOVE))//second param allows checks for messages of a specific window --- thread dependent?
+		if (PeekMessage(&Msg, 0, 0, 0, PM_REMOVE))// second param allows checks for messages of a specific window --- thread dependent?
 		{
 			TranslateMessage(&Msg);
 			DispatchMessage(&Msg);
@@ -99,8 +100,6 @@ int D3DAppControl::Run()
 			if (!mAppPaused)
 			{
 				CalculateFrameStats();
-//				UpdateScene(mTimer.DeltaTime());
-//				DrawScene();
 			}
 			else
 			{
@@ -172,7 +171,6 @@ void D3DAppControl::OnResize()
 
 	md3dImmediateContext->OMSetRenderTargets( 1, &mRenderTargetView, mDepthStencilView);
 
-
 	mScreenViewport.TopLeftX	= 0;
 	mScreenViewport.TopLeftY	= 0;
 	mScreenViewport.Width		= static_cast<float>(mClientWidth);
@@ -183,116 +181,8 @@ void D3DAppControl::OnResize()
 	md3dImmediateContext->RSSetViewports(1, &mScreenViewport);
 }
 
-/*LRESULT D3DAppControl::MsgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-	switch ( Msg )
-	{
-	case WM_LBUTTONDOWN:
-	case WM_MBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-
-	case WM_LBUTTONUP:
-	case WM_MBUTTONUP:
-	case WM_RBUTTONUP:
-		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-
-	case WM_MOUSEMOVE:
-		OnMouseMove(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		return 0;
-
-	// end user input processes
-
-	case WM_ACTIVATE:
-		if ( LOWORD(wParam) == WA_INACTIVE )
-		{
-			mInactive = true;
-			mTimer.Stop();
-		}
-		else
-		{
-			mInactive = false;
-			mTimer.Start();
-		}
-		return 0;
-
-	case WM_SIZE:
-		mClientWidth	= LOWORD(lParam);
-		mClientHeight	= HIWORD(lParam);
-
-		if ( md3dDevice && mSwapChain )
-		{
-			if ( wParam == SIZE_MINIMIZED )
-			{
-				mInactive	= true;
-				mMinimized	= true;
-				mMaximized	= false;
-			}
-			else if ( wParam == SIZE_MAXIMIZED )
-			{
-				mInactive	= false;
-				mMinimized	= false;
-				mMaximized	= true;
-				OnResize();
-			}
-			else if ( wParam == SIZE_RESTORED )
-			{
-				if ( mMinimized )
-				{
-					mInactive	= false;
-					mMinimized	= false;
-					OnResize();
-				}
-				else if ( mMaximized )
-				{
-					mInactive	= false;
-					mMaximized	= false;
-					OnResize();
-				}
-				else if ( mResizing )
-				{
-					mInactive = true;
-				}
-				else
-				{
-					OnResize();
-				}
-			}
-		}
-		return 0;
-
-	case WM_ENTERSIZEMOVE:
-		mInactive = true;
-		mResizing = true;
-		return 0;
-
-	case WM_EXITSIZEMOVE:
-		mInactive = false;
-		mResizing = false;
-		OnResize();
-		return 0;
-
-	case WM_MENUCHAR:
-		return MAKELRESULT(0, MNC_CLOSE);// --------------------------------------------------curious about actual purpose
-
-	case WM_GETMINMAXINFO:
-		(reinterpret_cast<MINMAXINFO*>(lParam))->ptMinTrackSize.x	= 800;//--------------------------changed casts (minmaxinfo*)
-		(reinterpret_cast<MINMAXINFO*>(lParam))->ptMinTrackSize.y	= 600;
-		return 0;
-
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		return 0;
-	}
-	return DefWindowProc(hWnd, Msg, wParam, lParam);
-}*/
-
 bool D3DAppControl::InitMainWind()
 {
-
-	//HINSTANCE instance = GetModuleHandle(NULL);
 	WNDCLASS wc;
 	wc.style			= CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc		= MainWndProc;
@@ -312,12 +202,12 @@ bool D3DAppControl::InitMainWind()
 	}
 
 	/*RECT R = {0, 0, mClientWidth, mClientHeight};
-	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);*///remove from final build?
+	AdjustWindowRect(&R, WS_OVERLAPPEDWINDOW, false);*/// TODO: remove from final build?
 	int width = mClientWidth; //R.right - R.left;
 	int height = mClientHeight; //R.bottom - R.top;
 
 	mhMainWnd = CreateWindow(L"myclass", mMainWndCaption.c_str(),
-		WS_OVERLAPPEDWINDOW, 500, 500, width, height, 0, 0, mhAppInstance, 0);//----compress these for ch limit reasons?
+		WS_OVERLAPPEDWINDOW, 500, 500, width, height, 0, 0, mhAppInstance, 0);
 
 	if ( !mhMainWnd )
 	{
@@ -326,13 +216,13 @@ bool D3DAppControl::InitMainWind()
 		/*DWORD Error = GetLastError();
 		char ErrorBuffer[ 1024 ];
 		wsprintf( reinterpret_cast<LPWSTR>(ErrorBuffer), L"Error creating window. Error code, decimal %d, hexadecimal %X.", Error, Error );
-		MessageBox( NULL, reinterpret_cast<LPWSTR>(ErrorBuffer), L"Error", MB_ICONHAND );*///-----------------------------------------------------interesting code, review
+		MessageBox( NULL, reinterpret_cast<LPWSTR>(ErrorBuffer), L"Error", MB_ICONHAND );*/// TODO: interesting code, review
 	
 		return false;
 	}
 
-	ShowWindow(mhMainWnd, SW_SHOW);//----they seem slightly required or proper messages arent handled
-	UpdateWindow(mhMainWnd);//---------------------are these really necessary, does createWindow not send out the proper messages for thiis?
+	ShowWindow(mhMainWnd, SW_SHOW);
+	UpdateWindow(mhMainWnd);
 
 	return true;
 }
@@ -351,12 +241,12 @@ bool D3DAppControl::InitDirect3D()
 	if (FAILED(hr))
 	{
 		MessageBox(0, L"CreateDevice FAILED", 0, 0);
-		//return false;
+		return false;
 	}
 	if ( featureLevel != D3D_FEATURE_LEVEL_10_1)
 	{
 		MessageBox(0, L"D3D11 Not Supported", 0, 0);
-		//return false;
+		return false;
 	}
 
 	HR(md3dDevice->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, 4, &m4xMsaaQuality));
@@ -386,7 +276,7 @@ bool D3DAppControl::InitDirect3D()
 	sd.BufferUsage	= DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	sd.BufferCount	= 1;
 	sd.OutputWindow	= mhMainWnd;
-	sd.Windowed		= false;//-----------------------------------------may cause issues with relation to client area vs window area line 130 no swap chain
+	sd.Windowed		= true;// TODO: CHECK: may cause issues with relation to client area vs window area line 130 no swap chain
 	sd.SwapEffect	= DXGI_SWAP_EFFECT_DISCARD;
 	sd.Flags		= 0;
 
@@ -394,7 +284,7 @@ bool D3DAppControl::InitDirect3D()
 	HR(md3dDevice->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(&dxgiDevice)));
 
 	IDXGIAdapter* dxgiAdapter = 0;
-	HR(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(&dxgiAdapter)));// proper cast replaces (void**)
+	HR(dxgiDevice->GetParent(__uuidof(IDXGIAdapter), reinterpret_cast<void**>(&dxgiAdapter)));
 
 	IDXGIFactory* dxgiFactory = 0;
 	HR(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), reinterpret_cast<void**>(&dxgiFactory)));
@@ -406,6 +296,7 @@ bool D3DAppControl::InitDirect3D()
 	ReleaseCOM(dxgiAdapter);
 	ReleaseCOM(dxgiFactory);
 
+	mSwapChain->SetFullscreenState(true, nullptr);
 	OnResize();
 
 	return true;
@@ -422,7 +313,7 @@ void D3DAppControl::CalculateFrameStats()
 
 	if ( currTime >= 1.0f )
 	{
-		float fps = static_cast<float>(frameCnt);//------------------------return/remove cast
+		float fps = static_cast<float>(frameCnt);
 		float mspf = 1000.0f / fps;
 
 		std::wostringstream ws;
@@ -442,11 +333,11 @@ void D3DAppControl::CalculateFrameStats()
 
 //***********************************************************************************************
 //***********************************  Questions  ***********************************************
-//1. DONT FORGET OTHER NEEDED MACROS
-//2. float / int results in float? check relations of such assosiations--see getapsectratio()
+//1. 
+//2. 
 //3. look up mSwapChain->getbuffer() why the uuidof and void**
-//4. pointers to functions??
+//4. 
 //5. check create device function and its relation to feature levels.
-//6. REMOVE C STYLE CASTS, EDIT FPS?
+//6. 
 //***********************************************************************************************
 //***********************************************************************************************

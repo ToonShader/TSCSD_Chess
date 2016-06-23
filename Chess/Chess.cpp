@@ -31,13 +31,11 @@ Chess::~Chess()
 
 int Chess::Run()
 {
-	MSG Msg = {0}; // same as ZeroMemory() macro??-------
-
-	//mTimer.Reset();
+	MSG Msg = {0};
 
 	while (Msg.message != WM_QUIT)
 	{
-		if (PeekMessage(&Msg, 0, 0, 0, PM_REMOVE))//second param allows checks for messages of a specific window --- thread dependent?
+		if (PeekMessage(&Msg, 0, 0, 0, PM_REMOVE))// TODO: Learn: second param allows checks for messages of a specific window --- thread dependent?
 		{
 			TranslateMessage(&Msg);
 			DispatchMessage(&Msg);
@@ -47,9 +45,12 @@ int Chess::Run()
 			MenuDef::MenuType menuItem = mRenderTarget->GetMenuItem();
 			if (menuItem != MenuDef::None)
 			{
-				ProcessMenu(menuItem);
+				if (!ProcessMenu(menuItem))
+				{
+					mRenderTarget->a();
+					PostQuitMessage(0);
+				}
 			}
-			//CalculateFrameStats();
 			mGameLogic->Frame();
 		}
 	}
@@ -60,23 +61,22 @@ int Chess::Run()
 bool Chess::Init()
 {
 	mGameLogic = new GameLogic();
-	//mGameLogic->InitObjects();
 
 	mPlayerViews[0] = new PlayerView(QuickDef::Black);
 	mPlayerViews[1] = new PlayerView(QuickDef::Red);
 	mReplayView = new ReplayView(false);
 
-	mGameLogic->AttachViews(2, true, mPlayerViews);//-----------------------------------------------------------------------------------------------------------
+	mGameLogic->AttachViews(2, true, mPlayerViews);
 	mPlayerViews[0]->AttachGameLogic(mGameLogic);
 
-	mRenderTarget = new RenderTarget(mhInstance, *mGameLogic);//fix &
+	mRenderTarget = new RenderTarget(mhInstance, *mGameLogic);
 	mRenderTarget->Init();
 	mPlayerViews[0]->SetRenderTarget(mRenderTarget);
 
 	return true;
 };
 
-void Chess::ProcessMenu(MenuDef::MenuType action)
+bool Chess::ProcessMenu(MenuDef::MenuType action)
 {
 	switch (action)
 	{
@@ -91,7 +91,7 @@ void Chess::ProcessMenu(MenuDef::MenuType action)
 		{
 			mGameLogic->Reset();
 		}
-		return;
+		return true;
 
 	case MenuDef::NewReplay:
 		if (mCurrentlyPlayer)
@@ -104,7 +104,7 @@ void Chess::ProcessMenu(MenuDef::MenuType action)
 		{
 			mGameLogic->Reset();
 		}
-		return;
+		return true;
 
 	case MenuDef::LoadPlayer:
 		if (mCurrentlyPlayer)
@@ -123,7 +123,7 @@ void Chess::ProcessMenu(MenuDef::MenuType action)
 			mGameLogic->QuickRun();
 			mGameLogic->AttachViews(2, true, mPlayerViews);
 		}
-		return;
+		return true;
 
 	case MenuDef::LoadReplay:
 		if (mCurrentlyPlayer)
@@ -136,5 +136,9 @@ void Chess::ProcessMenu(MenuDef::MenuType action)
 		{
 			mGameLogic->Reset();
 		}
+		return true;
+		
+	case MenuDef::Exit:
+		return false;
 	}
 };

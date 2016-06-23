@@ -2,7 +2,7 @@
 
 namespace QuickDef
 {
-	Player& QuickDef::operator++ (Player& lhs)//for simplification of player switching
+	Player& QuickDef::operator++ (Player& lhs)// for simplification of player switching
 	{
 		if (lhs == 1)
 		{

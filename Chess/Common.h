@@ -22,8 +22,6 @@ Player& operator++ (Player& lhs);
 
 enum MoveType	{King, Queen, Knight, Bishop, Rook, Pawn, None};
 enum Type {Board, Piece, Menu};
-//enum MenuLevel {Full, PvP, Replay, SUB_New};
-//enum MenuType {New, Load, Save, Exit};
 
 };// end namespace
 

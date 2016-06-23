@@ -1,10 +1,5 @@
-#include "GameLogic.h"
-//#include "702/702_Util.h"
 #include <WindowsX.h>
-
-//*************************************
-//		GameLogic definitions
-//*************************************
+#include "GameLogic.h"
 
 RenderTarget* GameView::mRenderTarget = 0;
 GameLogic* GameView::mGameLogic = 0;
@@ -51,7 +46,7 @@ LRESULT GameLogic::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				mPlayers[0]->MouseInput(msg, wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 
 			else if (mPlayers[mCurrPlayer] != 0)
-				mPlayers[mCurrPlayer]->MouseInput(msg, wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));//#define GET_X_LPARAM(lp)            ((int)(short)LOWORD(lp))#define GET_Y_LPARAM(lp)        ((int)(short)HIWORD(lp))
+				mPlayers[mCurrPlayer]->MouseInput(msg, wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	}
 
@@ -78,14 +73,13 @@ bool GameLogic::EventProcess(const Event& data)
 {
 	if (data.Move)
 	{
-		if (MoveProcess(data.Selected, data.diffX, data.diffZ, data.Real))//possible issue not referencing player?
+		if (MoveProcess(data.Selected, data.diffX, data.diffZ, data.Real))// TODO: Checl: possible issue not referencing player?
 		{
 			if (! data.Real)
 			{
 				return true;
 			}
-			Location2D location = data.Picked->GetLocation();//what is the purpose??
-			//data.Selected->SetLocation(location.x, location.z);
+			Location2D location = data.Picked->GetLocation();
 
 			data.Selected->UpdateLocation(data.diffX, data.diffZ);
 			data.Selected->EndSpecial();
@@ -118,8 +112,8 @@ bool GameLogic::EventProcess(const Event& data)
 				}
 
 				location = data.Selected->GetLocation();
-				UINT finalX = location.x;// + data.diffX;
-				UINT finalZ = location.z;// + data.diffZ;
+				UINT finalX = location.x;
+				UINT finalZ = location.z;
 				for (UINT i = 0; i < count; ++i)
 				{
 					location = objects[i]->GetLocation();
@@ -381,7 +375,7 @@ void GameLogic::RemoveObject(Object* const removed)
 	}
 };
 
-bool GameLogic::MoveProcess(Object* selected, int diffX, int diffZ, bool real)//review code
+bool GameLogic::MoveProcess(Object* selected, int diffX, int diffZ, bool real)
 {
 	QuickDef::Player player = selected->GetPlayer();
 	QuickDef::MoveType moveType = selected->GetMoveType();
@@ -614,7 +608,7 @@ bool GameLogic::CheckPositions(Location2D base, QuickDef::Player currPlayer, int
 		delete fullObjects;
 		return false;
 	}
-	if (diffX == 0 && diffZ == 0)//unused not really
+	if (diffX == 0 && diffZ == 0)
 	{
 		delete fullObjects;
 		return false;
@@ -812,7 +806,7 @@ bool GameLogic::CheckPositions(Location2D base, QuickDef::Player currPlayer, int
 		return true;
 	}
 	delete fullObjects;
-	return false;//shouldnt reach here
+	return false;
 };
 
 bool GameLogic::CheckWin(Object* const picked)

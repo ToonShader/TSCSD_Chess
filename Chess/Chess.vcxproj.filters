@@ -42,12 +42,6 @@
     <ClInclude Include="702\GameTimer.h">
       <Filter>702</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\..\Program Files\CPU\DVD\Code\Common\d3dx11effect.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Main.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="GeometryGenerator.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
@@ -63,9 +57,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="702\702_Create.cpp">
-      <Filter>702</Filter>
-    </ClCompile>
-    <ClCompile Include="702\702_Util.cpp">
       <Filter>702</Filter>
     </ClCompile>
     <ClCompile Include="702\GameTimer.cpp">

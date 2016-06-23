@@ -2,21 +2,9 @@
 #define GAMELOGIC
 
 #include "GameView.h"
-//#include "Objects.h"
-//#include "Common.h"
 
 class GameView;
 struct ObjectInfo;
-
-/*struct Event
-{
-	QuickDef::Player CurrPlayer;
-	Object* Selected;
-	Object* Picked;
-	bool Move;
-	int diffX;
-	int diffZ;
-};*/
 
 class GameLogic
 {
@@ -45,18 +33,16 @@ private:
 
 private:
 	Object* mGameBoard[64];
-	//Object* mAllPlayerObjects[32];
 	Object* mBlackObjects[16];
 	Object* mRedObjects[16];
 
-	//UINT mTotalPlayerObjCount;
 	UINT mBlackObjectCount;
 	UINT mRedObjectCount;
 
 	GameView* mPlayers[2];
 	QuickDef::Player mCurrPlayer;
 	QuickDef::Player mLastPlayer;
-	bool mReplay;// i dont lik the way i am managing the views!!!!!!
+	bool mReplay;
 };
 
 

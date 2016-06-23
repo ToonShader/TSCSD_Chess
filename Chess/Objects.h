@@ -4,32 +4,8 @@
 #include "702/702_Util.h"
 #include "Common.h"
 
-/*namespace QuickDef
-{
-	enum Player	{Black, Red};
-	Player& operator++ (Player& lhs)//for simplification of player switching
-{
-	if (lhs == 1)
-	{
-		lhs = Black;
-		return lhs;
-	}
-	else
-	{
-		lhs = Red;
-		return lhs;
-	}
-};
 
-enum MoveType	{King, Queen, Knight, Bishop, Rook, Pawn, None};
-enum Type {Board, Piece, Menu};
-};// end namespace
-
-struct Location2D
-{
-	int x;
-	int z;
-};*/
+// TODO: Make template class
 
 class Object
 {
@@ -59,7 +35,6 @@ public:
 	const UINT ID;
 
 protected:
-	//Object();
 	Object(QuickDef::Player player, QuickDef::MoveType moveType, QuickDef::Type Type,  int x, int z);
 
 protected:
@@ -128,50 +103,20 @@ public:
 	Board(QuickDef::Player player, int x, int z);
 };
 
-class Menu //: public Object
+// TODO: Also make template class?
+class Menu
 {
 public:
 	Menu(float xOffset, float yOffset, MenuDef::MenuType type);
 	~Menu();
 
-
-//	void Draw(ID3D11DeviceContext* d3dImmediateContext);
-
 	MenuDef::MenuType GetMenuAction();
 	XMMATRIX GetWorldTransform();
-	//void GetBufferOffsets(UINT& indexCount, UINT& indexOffset, UINT&
 
 private:
 	XMFLOAT4X4 mWorld;
 
 	MenuDef::MenuType mMenuType;
-
-	//static ID3D11Buffer* mBackDropVertexBuffer;
-	//static ID3D11Buffer* mBackDropIndexBuffer;
-	//static UINT mBackDropIndexCount;
-
-	//static UINT mBaseReferenceCount;
-	/*static UINT mMenuNewRefCount;
-	static UINT mMenuLoadRefCount;
-	static UINT mMenuSaveRefCount;
-	static UINT mMenuExitRefCount;
-	static UINT mMenuPlayerRefCount;
-	static UINT mMenuReplayRefCount;
-	static UINT mMenuQueenRefCount;
-	static UINT mMenuKnightRefCount;
-	static UINT mMenuBishopRefCount;
-	static UINT mMenuRookRefCount;
-	static UINT mMenuRedRefCount;
-	static UINT mMenuBlackRefCount;
-	static UINT mMenuWinRefCount;*/
-
-//protected:
-	//static ID3D11Buffer* mMenuVertexBuffer;
-	//static ID3D11Buffer* mMenuIndexBuffer;
-
-	//UINT mMenuIndexCount;
-
-
 };
 
 //*****************************************

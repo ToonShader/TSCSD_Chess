@@ -13,8 +13,6 @@
 #include "GameTimer.h"
 #include "702_Util.h"
 #include <string>
-//#include <cstring>
-//#include <cstdlib>
 
 class D3DAppControl
 {
@@ -32,18 +30,7 @@ public:
 
 	virtual bool Init();
 	virtual void OnResize();
-//	virtual void UpdateScene(float deltaTime) = 0;
-//	virtual void DrawScene() = 0;
-	virtual LRESULT MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) = 0;//do not forget to edit
-
-
-	//virtual void OnMouseDown(WPARAM btnState, int x, int y) { }
-	//virtual void OnMouseUp (WPARAM btnState, int x, int y)  { }//------------------------------------------------------------
-	//virtual void OnMouseMove(WPARAM btnState, int x, int y) { }
-
-
-
-//	UINT CheckMsaaQuality();//-------virtual?? seems to not exist
+	virtual LRESULT MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) = 0;// TODO: Check: do not forget to edit
 
 protected:
 	bool InitMainWind();
@@ -64,17 +51,17 @@ protected:
 
 	GameTimer mTimer;
 
-	ID3D11Device*				md3dDevice;//these done in Init
-	ID3D11DeviceContext*		md3dImmediateContext;//
+	ID3D11Device*				md3dDevice;
+	ID3D11DeviceContext*		md3dImmediateContext;
 	IDXGISwapChain*				mSwapChain;
 	ID3D11Texture2D*			mDepthStencilBuffer;
-	ID3D11RenderTargetView*		mRenderTargetView;//one without view?
+	ID3D11RenderTargetView*		mRenderTargetView;// TODO: Check for one without view
 	ID3D11DepthStencilView*		mDepthStencilView;
 	D3D11_VIEWPORT				mScreenViewport;
 
 	// variables child class should override
-	std::wstring	mMainWndCaption;// is std:: already declared
-	//wstring blank;
+	std::wstring	mMainWndCaption;
+
 	D3D_DRIVER_TYPE	md3dDriverType;
 	int				mClientHeight;
 	int				mClientWidth;
@@ -84,8 +71,6 @@ protected:
 };
 
 #endif // defined CREATE702_H
-
-//D3D_FEATURE_LEVEL mfeatureLevel; /*where dooes this go?------------------------ */
 
 //***********************************************************************************************
 //***********************************  Questions  ***********************************************

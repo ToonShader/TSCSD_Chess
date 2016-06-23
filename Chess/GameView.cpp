@@ -36,7 +36,7 @@ Vertex::Vertex(const GeometryGenerator::Vertex& other)
 
 RenderTarget::RenderTarget(HINSTANCE hInstance, GameLogic& gameLogic)
 	:D3DAppControl(hInstance),  mMenued(false), mTestVertexBuffer(0), mTestIndexBuffer(0), mMenuListCount(0), mMenuList(0), 
-	mWireFrame(false), mMenuCloseable(true), mSelectedMenu(MenuDef::None), mGameLogic(0), mRankingPlayer(QuickDef::NoPlayer) //mSelectedObject(0),
+	mWireFrame(false), mMenuCloseable(true), mSelectedMenu(MenuDef::None), mGameLogic(0), mRankingPlayer(QuickDef::NoPlayer)
 {
 		mGameLogic = &gameLogic;
 		XMMATRIX I = XMMatrixIdentity();
@@ -48,7 +48,6 @@ RenderTarget::RenderTarget(HINSTANCE hInstance, GameLogic& gameLogic)
 		XMStoreFloat4(&mColorHighlight, XMVectorSet(0.0f, 0.2f, 0.2f, 0.0f));
 		
 		SetMenuLevel(MenuDef::Main);
-		//mViewWorld = XMVectorSet(3.5f, 0.0f, 3.5f, 1.0f);
 };
 
 RenderTarget::~RenderTarget()
@@ -85,8 +84,6 @@ LRESULT RenderTarget::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case VK_ESCAPE:
 			if (! mMenued)
 			{
-				//mSelectedMenu = MenuDef::LoadReplay;
-				//return 0;
 				mMenued = true;
 				SetMenuLevel(MenuDef::Main);
 			}
@@ -177,10 +174,10 @@ LRESULT RenderTarget::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 0;
 
 	case WM_MENUCHAR:
-		return MAKELRESULT(0, MNC_CLOSE);// --------------------------------------------------curious about actual purpose
+		return MAKELRESULT(0, MNC_CLOSE);// TODO: Learn: curious about actual purpose
 
 	case WM_GETMINMAXINFO:
-		(reinterpret_cast<MINMAXINFO*>(lParam))->ptMinTrackSize.x	= 800;//--------------------------changed casts (minmaxinfo*)
+		(reinterpret_cast<MINMAXINFO*>(lParam))->ptMinTrackSize.x	= 800;
 		(reinterpret_cast<MINMAXINFO*>(lParam))->ptMinTrackSize.y	= 600;
 		return 0;
 
@@ -192,7 +189,7 @@ LRESULT RenderTarget::MsgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	if (mGameLogic)
 		return mGameLogic->MsgProc(hWnd, msg, wParam, lParam);
 	else
-		return DefWindowProc(hWnd, msg, wParam, lParam);//issue??????????????
+		return DefWindowProc(hWnd, msg, wParam, lParam);// TODO: Determine: issue??????????????
 };
 
 bool RenderTarget::Init()
@@ -229,7 +226,6 @@ Object* RenderTarget::ObjectPick(int sx, int sy, CXMMATRIX view, ObjectInfo& obj
 
 	XMVECTOR rayOrigin	= XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	XMVECTOR rayDir		= XMVectorSet(vx, vy, 1.0f, 0.0f);
-	//rayDir = XMVector3Normalize(rayDir);
 	XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
 
 	if (mMenued)
@@ -243,8 +239,6 @@ Object* RenderTarget::ObjectPick(int sx, int sy, CXMMATRIX view, ObjectInfo& obj
 
 		for (UINT i = 0; i < mMenuListCount; ++i)
 		{
-			//Location2D locationOffset = mMenuList[i]->GetLocation();
-
 			XMMATRIX world = mMenuList[i]->GetWorldTransform();
 			world._42 += 0.75f;
 
@@ -269,8 +263,6 @@ Object* RenderTarget::ObjectPick(int sx, int sy, CXMMATRIX view, ObjectInfo& obj
 		return 0;
 	}
 
-	//XMMATRIX invView = XMMatrixInverse(&XMMatrixDeterminant(view), view);
-
 	UINT numObjects = (objects.numBlack + objects.numBoards + objects.numRed);
 	Object** fullObjects = new Object*[numObjects];
 	int k = 0;
@@ -289,12 +281,6 @@ Object* RenderTarget::ObjectPick(int sx, int sy, CXMMATRIX view, ObjectInfo& obj
 
 	Object* picked = 0;
 	float minDistance = FLT_MAX;
-	//XMVECTOR pickedV0 = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
-	//XMVECTOR pickedV1 = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
-	//XMVECTOR pickedV2 = XMVectorSet(FLT_MAX, FLT_MAX, FLT_MAX, 1.0f);
-
-
-
 
 	//main picking loop
 	for (UINT o = 0; o < numObjects; ++o)
@@ -395,15 +381,13 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 	{
 		_CrtDumpMemoryLeaks();
 	}
-	//BuildBlankBuffer();
-	//srand(time(0));
 
 	assert(mSwapChain);
 	assert(md3dImmediateContext);
 	
 	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Black));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-	// must it be set each call?
+	// TODO: Determine: must it be set each call?
 	md3dImmediateContext->IASetInputLayout(mInputLayout);
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	if (mWireFrame)
@@ -428,7 +412,7 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 
 	D3DX11_TECHNIQUE_DESC techDesc;
 	mTech->GetDesc(&techDesc);
-	for (UINT p = 0; p < techDesc.Passes; ++p)//can a float 4x4 be used to fill worldviewproj->setmatrix
+	for (UINT p = 0; p < techDesc.Passes; ++p)// TODO: Learn: can a float 4x4 be used to fill worldviewproj->setmatrix
 	{
 		XMMATRIX world = XMMatrixIdentity();
 		XMVECTOR color = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
@@ -463,38 +447,7 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 				mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 				md3dImmediateContext->DrawIndexed(mMenuBoxIndexCount, mMenuBoxIndexOffset, mMenuBoxVertexOffset);
 
-			}
-
-
-
-
-
-
-
-
-			/*md3dImmediateContext->IASetVertexBuffers(0, 1, &mMenuVertexBuffer, &stride, &offset);
-			md3dImmediateContext->IASetIndexBuffer(mMenuIndexBuffer, DXGI_FORMAT_R32_UINT, offset);
-			//world = XMLoadFloat4x4(&mMenuWorld);
-			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(XMMatrixTranslation(0.0f, 0.0f, 0.0f))));
-			mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&(color)));
-			mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&(colorHighlight)));
-			mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&(colorRandom)));
-
-			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-
-			md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-			md3dImmediateContext->DrawIndexed(mMenuBoxIndexCount, mMenuBoxIndexOffset, 0);
-
-			color = XMVectorSet(0.2f, 0.2f, 0.2f, 1.0f);
-			mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&(color)));
-			mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&(colorHighlight)));
-			mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&(colorRandom)));
-
-
-			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-			md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			md3dImmediateContext->DrawIndexed(mMenuBoxIndexCount, mMenuBoxIndexOffset, mMenuBoxVertexOffset);*/
-			
+			}	
 		}
 
 		//***********************
@@ -560,13 +513,6 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			world = XMLoadFloat4x4(& objects.BlackObjects[i]->GetWorldTransform());
 			color = XMLoadFloat4(& objects.BlackObjects[i]->mColorBase);
 			colorHighlight = XMLoadFloat4(& objects.BlackObjects[i]->mColorHighlight);
-
-			UINT a = rand();// % 2;
-			UINT b = rand();// % 2;
-			UINT c = rand();// % 2;
-			srand(a + b + c);
-
-			//colorRandom = XMVectorSet(0.000001f * static_cast<float>(a), 0.000001f * static_cast<float>(b), 0.000001f * static_cast<float>(c), 1.0f);
 
 			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
 			mFXColorBase->SetFloatVector(reinterpret_cast<float*>(& color));
@@ -800,7 +746,7 @@ void RenderTarget::MenuProcess(Menu* menuItem)
 		break;
 
 	case MenuDef::Exit:
-		mMenued = false;
+		mSelectedMenu = MenuDef::Exit;
 		break;
 
 	case MenuDef::LoadPlayer:
@@ -908,9 +854,7 @@ void RenderTarget::BuildBlankBuffer()
 	ReleaseCOM(mTestVertexBuffer);
 	std::ifstream bufferFile("Buffers/test.txt");
 
-
 	UINT vCount;
-	//UINT iCount;
 
 	bufferFile >> vCount;
 
@@ -1116,17 +1060,6 @@ void RenderTarget::BuildGeometryBuffers()
 	debugVertices[4] = Vertex(XMFLOAT3(0.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
 	debugVertices[5] = Vertex(XMFLOAT3(0.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
 
-	/*Vertex debugVertices[] =
-	{
-		{Vertex(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f))},
-		{XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)},
-		{XMFLOAT3(50.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f)},
-		{XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)},
-		{XMFLOAT3(0.0f, 50.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f)},
-		{XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)},
-		{XMFLOAT3(0.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f)}
-	};*/
-
 	UINT debugIndices[] =
 	{
 		0, 1,
@@ -1186,14 +1119,10 @@ void RenderTarget::BuildMenuBuffers()
 	mMenuBoxIndexCount = 8;
 	mMenuBoxIndexOffset = 0;
 
-	//GeometryGenerator::MeshData tempMesh;
-	//tempMesh.Vertices.insert(tempMesh.Vertices.begin(), menuVertexBuffer.begin(), menuVertexBuffer.end());
-	//tempMesh.Indices.insert(tempMesh.Indices.begin(), menuIndexBuffer.begin(), menuIndexBuffer.end());
 	BuildBoxExtents(menuBuffer, mMenuBox);
 	
 	vert.Position.z = 0.0f;
 	std::ifstream bufferFile;
-	//UINT vertexCount;
 
 	//Text buffer NEW
 	bufferFile.open("Buffers/MenuNew.txt");
@@ -1371,11 +1300,9 @@ void RenderTarget::BuildMenuBuffers()
 	mMenuMesh.Vertices.insert(mMenuMesh.Vertices.begin(), menuBuffer.Vertices.begin(), menuBuffer.Vertices.end());
 	mMenuMesh.Indices.insert(mMenuMesh.Indices.begin(), menuBuffer.Indices.begin(), menuBuffer.Indices.end());
 
-	//XMStoreFloat4x4(&mMenuWorld, XMMatrixTranslation(3.5f, 3.5f, 3.5f));
-
 	UINT vertexCount = mMenuMesh.Vertices.size();
 	UINT indexCount = mMenuMesh.Indices.size();
-	mMenuBoxVertexOffset = 0; //vertexCount - 4;
+	mMenuBoxVertexOffset = 0;
 
 	XMVECTOR white = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 	std::vector<Vertex> vertices(vertexCount);
@@ -1471,7 +1398,7 @@ void RenderTarget::BuildBoxExtents(GeometryGenerator::MeshData& meshData, XNA::A
 		vMax = XMVectorMax(vMax, currVert);
 	}
 
-	XMStoreFloat3(&boxData.Center,  0.5f*(vMax + vMin));//try flop--------------------------
+	XMStoreFloat3(&boxData.Center,  0.5f*(vMax + vMin));
 	XMStoreFloat3(&boxData.Extents, 0.5f*(vMax - vMin));
 };
 
@@ -1588,7 +1515,6 @@ void GameView::ProcessPicked(Object* picked)
 		{
 			if (mSelected == 0)
 			{
-				//mSelected = picked;
 				return;
 			}
 			Location2D selectedLoc = mSelected->GetLocation();
@@ -1607,7 +1533,7 @@ void GameView::ProcessPicked(Object* picked)
 			move.diffZ = difference.z;
 			if (SendEvent(move))
 			{
-				mSelected->Deselect();//feels out of place, where are objects removed?
+				mSelected->Deselect();
 				mSelected = 0;
 				ClearAssists();
 
@@ -1631,7 +1557,7 @@ void GameView::ProcessPicked(Object* picked)
 			}
 
 		}
-		return; //in theory
+		return;
 	}
 	else if (objectType == QuickDef::Board)
 	{
@@ -1854,11 +1780,6 @@ void PlayerView::OnMouseDown(WPARAM btnState, int x, int y)
 {
 	if ( (btnState & MK_LBUTTON) )
 	{
-		/*mLastDrawPos.x = x;
-		mLastDrawPos.y = y;
-		CreateBuffer(x, y);
-		return;//remove*/
-
 		ObjectInfo currObjects = GetObjects();
 		Object* picked = ObjectPick(x, y, currObjects);
 		if (picked != 0)
@@ -2100,7 +2021,7 @@ void ReplayView::OnMouseDown(WPARAM btnState, int sx, int sy)
 			Object* fake = ObjectPick(sx, sy, currObjects);
 			return;
 		}
-		//Object* fake = ObjectPick(sx, sy, currObjects);
+
 		if (! (*mReplayFile >> p >> x >> z))
 		{
 			Object* fakes = ObjectPick(sx, sy, currObjects);
@@ -2238,13 +2159,3 @@ Object* ReplayView::FindObject(UINT x, UINT z, ObjectInfo& objects)
 	}
 	return 0;
 };
-
-//****************************************
-//		MenuManager definitions
-//****************************************
-
-/*MenuManager::MenuManager(QuickDef::MenuLevel currLevel)
-	:mMenuListNumber(0)
-{
-	CreateMenus(currLevel);
-};*/

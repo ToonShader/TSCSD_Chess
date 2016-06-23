@@ -14,20 +14,20 @@ GameTimer::GameTimer()
 	mDeltaTime(-1.0),
 	mBaseTime(0),
 	mPausedTime(0),
-	mStopTime(0),// perhaps dont initialize? ---- seems to be set when stop() is called
+	mStopTime(0),
 	mPrevTime(0),
 	mCurrTime(0),
 	mStopped(false)
 {
 	__int64 countsPerSec;
 	QueryPerformanceFrequency((LARGE_INTEGER*) &countsPerSec);
-	mSecondsPerCount = 1.0 / static_cast<double>(countsPerSec);//replaced (double)
+	mSecondsPerCount = 1.0 / static_cast<double>(countsPerSec);
 }
 
 float GameTimer::TotalTime() const
 {
 	if ( mStopped )
-		return static_cast<float>((((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount));//replaced (float)
+		return static_cast<float>((((mStopTime - mPausedTime) - mBaseTime) * mSecondsPerCount));
 
 	else
 		return static_cast<float>((((mCurrTime - mPausedTime) - mBaseTime) * mSecondsPerCount));
@@ -58,7 +58,7 @@ void GameTimer::Start()
 	{
 		mPausedTime += (startTime - mStopTime);
 
-		mPrevTime = startTime; // for animation/ frametime reasons?
+		mPrevTime = startTime;
 		mStopTime = 0;
 		mStopped  = false;
 	}
@@ -99,7 +99,7 @@ void GameTimer::Tick()
 
 //***********************************************************************************************
 //***********************************  Questions  ***********************************************
-//1. why initialize secondspercount only to chang its value, also why the negative for deltatime
+//1. 
 //2.
 //3.
 //***********************************************************************************************

@@ -24,7 +24,7 @@ public:
 
 private:
 	double mSecondsPerCount;
-	double mDeltaTime;// why double
+	double mDeltaTime;
 
 	__int64 mBaseTime;
 	__int64 mPausedTime;

@@ -1,8 +1,5 @@
 #include "Objects.h"
 
-
-
-
 //*********************************
 //		Object definitions
 //********************************
@@ -31,7 +28,7 @@ Object::Object(QuickDef::Player player, QuickDef::MoveType moveType, QuickDef::T
 		XMVECTOR color = XMVectorSet(0.12f, 0.12f, 0.12f, 1.0f);
 		XMStoreFloat4(&mColorBase, color);
 	}
-	mColorHighlight = reinterpret_cast<float*>(&(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f)));//just trying this----------------------
+	mColorHighlight = reinterpret_cast<float*>(&(XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f)));
 };
 
 Object::~Object()
@@ -56,10 +53,6 @@ void Object::UpdateLocation(int x, int z)
 {
 	mLocation.x += x;
 	mLocation.z += z;
-	//int a = mWorld(3, 0);
-	//int X = mWorld(4, 1);
-	//int b = mWorld(3, 2);
-	//int Z = mWorld(4, 3);
 	mWorld(3, 0) += static_cast<float>(x);
 	mWorld(3, 2) += static_cast<float>(z);
 };

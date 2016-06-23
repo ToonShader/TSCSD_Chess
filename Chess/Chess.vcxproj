@@ -75,7 +75,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\Program Files\CPU\DVD\Code\Common\d3dx11effect.h" />
     <ClInclude Include="702\702_Create.h" />
     <ClInclude Include="702\702_Util.h" />
     <ClInclude Include="702\GameTimer.h" />
@@ -84,13 +83,11 @@
     <ClInclude Include="GameLogic.h" />
     <ClInclude Include="GameView.h" />
     <ClInclude Include="GeometryGenerator.h" />
-    <ClInclude Include="Main.h" />
     <ClInclude Include="Objects.h" />
     <ClInclude Include="xnacollision.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="702\702_Create.cpp" />
-    <ClCompile Include="702\702_Util.cpp" />
     <ClCompile Include="702\GameTimer.cpp" />
     <ClCompile Include="Chess.cpp" />
     <ClCompile Include="Common.cpp" />
