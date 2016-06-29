@@ -27,7 +27,7 @@ Chess::~Chess()
 		delete mReplayView;
 	if(mRenderTarget)
 		delete mRenderTarget;
-	};
+};
 
 int Chess::Run()
 {
