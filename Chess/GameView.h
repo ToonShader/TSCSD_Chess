@@ -34,7 +34,7 @@ public:
 
 	bool Init();
 	void OnResize();
-	void a() {mSwapChain->SetFullscreenState(false,0);}
+	void CloseWindow() { DestroyWindow(mhMainWnd); } //mSwapChain->SetFullscreenState(false,0);}
 	MenuDef::MenuType GetMenuItem();
 	void MenuOpen(QuickDef::Player player, MenuDef::MenuLevel);
 	void MenuClose();

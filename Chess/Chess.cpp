@@ -27,7 +27,7 @@ Chess::~Chess()
 		delete mReplayView;
 	if(mRenderTarget)
 		delete mRenderTarget;
-};
+	};
 
 int Chess::Run()
 {
@@ -47,8 +47,7 @@ int Chess::Run()
 			{
 				if (!ProcessMenu(menuItem))
 				{
-					mRenderTarget->a();
-					PostQuitMessage(0);
+					mRenderTarget->CloseWindow(); // TODO: Transform to a message sent to msg queue/create global msg queues?
 				}
 			}
 			mGameLogic->Frame();
