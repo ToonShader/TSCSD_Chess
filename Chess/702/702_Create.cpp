@@ -31,7 +31,7 @@ D3DAppControl::D3DAppControl(HINSTANCE hInstance)
 	mMinimized(false),
 	mMaximized(false),
 	m4xMsaaQuality(0),
-
+	
 	md3dDevice(0),
 	md3dImmediateContext(0),
 	mSwapChain(0),
@@ -51,15 +51,16 @@ D3DAppControl::D3DAppControl(HINSTANCE hInstance)
 
 D3DAppControl::~D3DAppControl()
 {
-	//mSwapChain->SetFullscreenState(false, nullptr);	
-	
 	ReleaseCOM(md3dDevice);
 
 	if (md3dImmediateContext)// TODO: Learn: why do we restore default settings
 		md3dImmediateContext->ClearState();
 
 	ReleaseCOM(md3dImmediateContext);
+
+	mSwapChain->SetFullscreenState(false, nullptr);
 	ReleaseCOM(mSwapChain);
+
 	ReleaseCOM(mDepthStencilBuffer);
 	ReleaseCOM(mDepthStencilView);
 	ReleaseCOM(mRenderTargetView);
@@ -235,7 +236,7 @@ bool D3DAppControl::InitDirect3D()
 #endif
 
 	D3D_FEATURE_LEVEL featureLevel;
-	D3D_FEATURE_LEVEL input = D3D_FEATURE_LEVEL_10_1;
+	D3D_FEATURE_LEVEL input = D3D_FEATURE_LEVEL_11_0;
 	HRESULT hr = D3D11CreateDevice(0, md3dDriverType, 0, createDeviceFlags, &input, 1, D3D11_SDK_VERSION, &md3dDevice, &featureLevel, &md3dImmediateContext);
 
 	if (FAILED(hr))
@@ -243,7 +244,7 @@ bool D3DAppControl::InitDirect3D()
 		MessageBox(0, L"CreateDevice FAILED", 0, 0);
 		return false;
 	}
-	if ( featureLevel != D3D_FEATURE_LEVEL_10_1)
+	if ( featureLevel != D3D_FEATURE_LEVEL_11_0)
 	{
 		MessageBox(0, L"D3D11 Not Supported", 0, 0);
 		return false;
@@ -296,7 +297,7 @@ bool D3DAppControl::InitDirect3D()
 	ReleaseCOM(dxgiAdapter);
 	ReleaseCOM(dxgiFactory);
 
-	mSwapChain->SetFullscreenState(true, nullptr);
+	//mSwapChain->SetFullscreenState(true, nullptr);
 	OnResize();
 
 	return true;
