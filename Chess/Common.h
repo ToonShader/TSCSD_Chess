@@ -1,5 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
+#pragma once
+
 #include <Windows.h>
 
 
@@ -47,6 +47,3 @@ struct Event
 	int diffX;
 	int diffZ;
 };
-
-
-#endif

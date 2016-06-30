@@ -1,5 +1,4 @@
-#ifndef GAMEVIEW
-#define GAMEVIEW
+#pragma once
 
 #include "702/702_Create.h"
 #include "Objects.h"
@@ -315,5 +314,3 @@ private:
 private:
 	static std::fstream* mReplayFile;
 };
-
-#endif

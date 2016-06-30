@@ -6,8 +6,7 @@
 //
 //*******************************  All Rights Reserved  *****************************************
 //***********************************************************************************************
-#ifndef UTIL702_H
-#define UTIL702_H
+#pragma once
 
 #if defined(DEBUG) || defined(_DEBUG)
 #define _CRTDBG_MAP_ALLOC
@@ -80,9 +79,6 @@ namespace Colors
 	XMGLOBALCONST XMVECTORF32 Silver    = {0.75f, 0.75f, 0.75f, 1.0f};
 	XMGLOBALCONST XMVECTORF32 LightSteelBlue = {0.69f, 0.77f, 0.87f, 1.0f};
 }
-
-
-#endif // UTIL702_H
 
 //***********************************************************************************************
 //***********************************  Questions  ***********************************************
