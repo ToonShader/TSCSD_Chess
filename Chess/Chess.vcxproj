@@ -100,6 +100,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FX\Basic.fx" />
+    <None Include="FX\LightHelper.fx" />
+    <None Include="FX\Lighting.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
