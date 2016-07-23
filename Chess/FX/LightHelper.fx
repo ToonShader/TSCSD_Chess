@@ -3,7 +3,7 @@ struct DirectionalLight
 	float4 Ambient;
 	float4 Diffuse;
 	float4 Specular;
-	float4 Direction;
+	float3 Direction;
 	float pad;
 };
 
@@ -44,9 +44,9 @@ struct Material
 	float4 Reflect;
 };
 
-void ComputeDirectionalLight(Material mat, DirecitonalLight L,
+void ComputeDirectionalLight(Material mat, DirectionalLight L,
 	float3 normal, float3 toeye,
-	out float4 amvient,
+	out float4 ambient,
 	out float4 diffuse,
 	out float4 spec)
 {
@@ -85,7 +85,7 @@ void ComputePointLight(Material mat, PointLight L, float3 pos, float3 normal, fl
 	spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// The vector from the surface to the light
-	float3 ightVec = L.Position - pos;
+	float3 lightVec = L.Position - pos;
 
 	// The distance from the surface to the light
 	float d = length(lightVec);
@@ -110,9 +110,9 @@ void ComputePointLight(Material mat, PointLight L, float3 pos, float3 normal, fl
 	if (diffuseFactor > 0.0f)
 	{
 		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.W);
+		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
 
-		diffuse = diffuseFactor * mat.Diffuse * L.diffuse;
+		diffuse = float4(10.0f, 0.0f, 0.0f, 0.0f); //diffuseFactor * mat.Diffuse * L.Diffuse;
 		spec = specFactor * mat.Specular * L.Specular;
 	}
 
@@ -156,10 +156,10 @@ void ComputeSpotLight(Material mat, SpotLight L, float3 pos, float3 normal, floa
 	if (diffuseFactor > 0.0f)
 	{
 		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toeye), 0.0f), mat > Specular.w);
+		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
 
 		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFacgtor * mat.Specular * L.Specular;
+		spec = specFactor * mat.Specular * L.Specular;
 	}
 
 	// Scale b spotlight factor and attenuate

@@ -17,16 +17,16 @@ Vertex::Vertex()
 
 };
 
-Vertex::Vertex(XMFLOAT3 pos, XMFLOAT4 color)
+Vertex::Vertex(XMFLOAT3 pos, XMFLOAT3 normal)
 {
 	Pos = pos;
-	Color = color;
+	Normal = normal;
 };
 
 Vertex::Vertex(const GeometryGenerator::Vertex& other)
 {
 	this->Pos = other.Position;
-	XMStoreFloat4(&this->Color, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
+	this->Normal = other.Normal;
 };
 
 //*************************************
@@ -35,19 +35,60 @@ Vertex::Vertex(const GeometryGenerator::Vertex& other)
 
 
 RenderTarget::RenderTarget(HINSTANCE hInstance, GameLogic& gameLogic)
-	:D3DAppControl(hInstance),  mMenued(false), mTestVertexBuffer(0), mTestIndexBuffer(0), mMenuListCount(0), mMenuList(0), 
-	mWireFrame(false), mMenuCloseable(true), mSelectedMenu(MenuDef::None), mGameLogic(0), mRankingPlayer(QuickDef::NoPlayer)
+	:D3DAppControl(hInstance),  mMenued(false), mTestVertexBuffer(nullptr), mTestIndexBuffer(nullptr), mMenuListCount(0), mMenuList(nullptr), 
+	mWireFrame(false), mMenuCloseable(true), mSelectedMenu(MenuDef::None), mGameLogic(nullptr), mRankingPlayer(QuickDef::NoPlayer),
+	mFXWorld(nullptr), mFXWorldInvTranspose(nullptr), mFXEyePosW(nullptr), mFXDirLight(nullptr), mFXPointLight(nullptr), mFXSpotLight(nullptr), 
+	mFXMaterial(nullptr)
 {
 		mGameLogic = &gameLogic;
 		XMMATRIX I = XMMatrixIdentity();
 		XMStoreFloat4x4 (&mView, I);
 		XMStoreFloat4x4 (&mProj, I);
 		
-		XMStoreFloat4(&mColorBlack, XMVectorSet(0.1f, 0.1f, 0.1f, 0.0f));
-		XMStoreFloat4(&mColorRed, XMVectorSet(0.9f, 0.1f, 0.1f, 0.0f));
+		// XMStoreFloat4(&mColorBlack, XMVectorSet(0.1f, 0.1f, 0.1f, 0.0f));
+		// XMStoreFloat4(&mColorRed, XMVectorSet(0.9f, 0.1f, 0.1f, 0.0f));
 		XMStoreFloat4(&mColorHighlight, XMVectorSet(0.0f, 0.2f, 0.2f, 0.0f));
-		
+		XMStoreFloat4(&mEyePosW, XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f));
 		SetMenuLevel(MenuDef::Main);
+
+		XMFLOAT4 EmptyColor(0.0f, 0.0f, 0.0f, 1.0f);
+		XMVECTOR lPos = XMVectorSet(9.0f, 5.0f, 3.5f, 1.0f);
+		XMVECTOR bMid = XMVectorSet(3.5f, 0.0f, 3.5f, 1.0f);
+
+		mDirLight.Ambient = EmptyColor;
+		mDirLight.Diffuse = EmptyColor;
+		mDirLight.Specular = EmptyColor;
+		XMStoreFloat3(&mDirLight.Direction, XMVector3Normalize(bMid - lPos));
+
+		mPointLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		mPointLight.Diffuse = XMFLOAT4(500.7f, 500.7f, 500.7f, 1.0f);
+		mPointLight.Specular = XMFLOAT4(100.7f, 100.7f, 100.7f, 1.0f);
+		mPointLight.Att = XMFLOAT3(1.0f, 1.0f, 1.0f);
+		mPointLight.Range = 100.0f;
+
+		mSpotLight.Ambient = EmptyColor;
+		mSpotLight.Diffuse = EmptyColor;
+		mSpotLight.Specular = EmptyColor;
+		mSpotLight.Att = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		mSpotLight.SpotFactor = 96.0f;
+		mSpotLight.Range = 10000.0f;
+
+		mPieceMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+		mPieceMat.Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		mPieceMat.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 16.0f);
+
+		mBoardMat.Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+		mBoardMat.Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+		mBoardMat.Specular = XMFLOAT4(0.15f, 0.15f, 0.15f, 16.0f);
+
+		mMenuMat.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		mMenuMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		mMenuMat.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		// TODO: Reflect values?
+
+
+		// XMStoreFloat4(&mViewDisplace, XMVectorSet(3.5f, 0.0f, 3.5f, 0.0f));
 };
 
 RenderTarget::~RenderTarget()
@@ -70,7 +111,7 @@ RenderTarget::~RenderTarget()
 		for (UINT i = 0; i < mMenuListCount; ++i)
 			delete mMenuList[i];
 
-		delete mMenuList;
+		delete[] mMenuList;
 	}
 };
 
@@ -368,37 +409,28 @@ void RenderTarget::MenuClose()
 	mMenuCloseable = true;
 };
 
-void RenderTarget::UpdateScene(float deltaTime, CXMMATRIX viewProj)
+void RenderTarget::UpdateScene(float deltaTime, CXMVECTOR eyePos, CXMMATRIX viewProj)
 {
+	XMStoreFloat4(&mEyePosW, eyePos);
 	XMStoreFloat4x4(&mView, viewProj);
-
 };
 
 void RenderTarget::DrawScene(ObjectInfo& objects)
 {
-	int i = 0;
-	if (i)
-	{
-		_CrtDumpMemoryLeaks();
-	}
-
 	assert(mSwapChain);
 	assert(md3dImmediateContext);
 	
-	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Black));
+	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	// TODO: Determine: must it be set each call?
 	md3dImmediateContext->IASetInputLayout(mInputLayout);
 	md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	if (mWireFrame)
-	{
-		md3dImmediateContext->RSSetState(mWireFrameRS);
-	}
-	else
-	{
-		md3dImmediateContext->RSSetState(0);
-	}
 
+	if (mWireFrame)
+		md3dImmediateContext->RSSetState(mWireFrameRS);
+
+	else
+		md3dImmediateContext->RSSetState(0);
 
 
 	UINT stride = sizeof(Vertex);
@@ -410,14 +442,19 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 	XMMATRIX proj = XMLoadFloat4x4(&mProj);
 	XMMATRIX viewProj = view*proj;
 
+	mFXDirLight->SetRawValue(&mDirLight, 0, sizeof(mDirLight));
+	mFXPointLight->SetRawValue(&mPointLight, 0, sizeof(mPointLight));
+	mFXSpotLight->SetRawValue(&mSpotLight, 0, sizeof(mSpotLight));
+	mFXEyePosW->SetFloatVector(reinterpret_cast<float*>(&mEyePosW));
+
 	D3DX11_TECHNIQUE_DESC techDesc;
 	mTech->GetDesc(&techDesc);
 	for (UINT p = 0; p < techDesc.Passes; ++p)// TODO: Learn: can a float 4x4 be used to fill worldviewproj->setmatrix
 	{
 		XMMATRIX world = XMMatrixIdentity();
-		XMVECTOR color = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
-		XMVECTOR colorHighlight = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-		XMVECTOR colorRandom = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+		// XMVECTOR color = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+		// XMVECTOR colorHighlight = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+		// XMVECTOR colorRandom = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
 		if (mMenued)
 		{
@@ -425,9 +462,10 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			md3dImmediateContext->IASetIndexBuffer(mMenuIndexBuffer, DXGI_FORMAT_R32_UINT, offset);
 			md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
-			mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&(color)));
-			mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&(colorHighlight)));
-			mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&(colorRandom)));
+			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&(color)));
+			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&(colorHighlight)));
+			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&(colorRandom)));
+			mFXMaterial->SetRawValue(&mMenuMat, 0, sizeof(mMenuMat));
 
 			for (UINT i = 0; i < mMenuListCount; ++i)
 			{
@@ -446,7 +484,6 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 				mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world)));
 				mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 				md3dImmediateContext->DrawIndexed(mMenuBoxIndexCount, mMenuBoxIndexOffset, mMenuBoxVertexOffset);
-
 			}	
 		}
 
@@ -460,22 +497,34 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 		world = XMMatrixTranslation(-0.5f, 0.0f, -0.5f);
 
 		mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
-		color = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
-		mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&colorHighlight));
-		mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&colorRandom));
+
+		Material debugMat;
+		debugMat.Ambient = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+		debugMat.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		debugMat.Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		debugMat.Reflect = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		mFXMaterial->SetRawValue(&debugMat, 0, sizeof(debugMat));
+		// color = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+		// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
+		// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&colorHighlight));
+		// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&colorRandom));
 
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
-
 		md3dImmediateContext->DrawIndexed(2, 0, 0);
-		color = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
+
+		debugMat.Ambient = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+		mFXMaterial->SetRawValue(&debugMat, 0, sizeof(debugMat));
+		//color = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		//mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
 
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(2, 2, 0);
 
-		color = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-		mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
+		debugMat.Ambient = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
+		mFXMaterial->SetRawValue(&debugMat, 0, sizeof(debugMat));
+		//color = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+		//mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
 
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(2, 4, 0);
@@ -490,13 +539,20 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 		for (UINT i = 0; i < objects.numBoards; ++i)
 		{
 			world = XMLoadFloat4x4(& objects.BoardObjects[i]->GetWorldTransform()); //possible issue using a return
-			color = XMLoadFloat4(& objects.BoardObjects[i]->mColorBase);
-			colorHighlight = XMLoadFloat4(& objects.BoardObjects[i]->mColorHighlight);
+			Material mat = mBoardMat;
+			XMVECTOR color = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+			color = XMLoadFloat4(&mat.Ambient);
+			color += XMLoadFloat4(& objects.BoardObjects[i]->mColorBase);
+			color += XMLoadFloat4(& objects.BoardObjects[i]->mColorHighlight);
+			XMStoreFloat4(&mat.Ambient, color);
+
+			// colorHighlight = 
 
 			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
-			mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
-			mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&colorHighlight));
-			mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&colorRandom));
+			mFXMaterial->SetRawValue(&mat, 0, sizeof(mat));
+			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
+			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&colorHighlight));
+			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&colorRandom));
 
 			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 			md3dImmediateContext->DrawIndexed(mBoardIndexCount, mBoardIndexOffset, mBoardVertexOffset);
@@ -511,13 +567,21 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			GetDrawInfo(currVertexOffset, currIndexOffset, currIndexCount, objects.BlackObjects[i], 0);//possible issue
 			
 			world = XMLoadFloat4x4(& objects.BlackObjects[i]->GetWorldTransform());
-			color = XMLoadFloat4(& objects.BlackObjects[i]->mColorBase);
-			colorHighlight = XMLoadFloat4(& objects.BlackObjects[i]->mColorHighlight);
+			Material mat = mPieceMat;
+			XMVECTOR color = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+			color = XMLoadFloat4(&mat.Ambient);
+			color += XMLoadFloat4(&objects.BlackObjects[i]->mColorBase);
+			color += XMLoadFloat4(&objects.BlackObjects[i]->mColorHighlight);
+			XMStoreFloat4(&mat.Ambient, color);
+			// color = XMLoadFloat4(& objects.BlackObjects[i]->mColorBase);
+			// colorHighlight = XMLoadFloat4(& objects.BlackObjects[i]->mColorHighlight);
 
 			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
-			mFXColorBase->SetFloatVector(reinterpret_cast<float*>(& color));
-			mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(& colorHighlight));
-			mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(& colorRandom));
+			mFXMaterial->SetRawValue(&mat, 0, sizeof(mat));
+
+			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(& color));
+			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(& colorHighlight));
+			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(& colorRandom));
 
 			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 			md3dImmediateContext->DrawIndexed(currIndexCount, currIndexOffset, currVertexOffset);
@@ -532,13 +596,21 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			GetDrawInfo(currVertexOffset, currIndexOffset, currIndexCount, objects.RedObjects[i], 0);
 
 			world = XMLoadFloat4x4(&objects.RedObjects[i]->GetWorldTransform());
-			color = XMLoadFloat4(&objects.RedObjects[i]->mColorBase);
-			colorHighlight = XMLoadFloat4(&objects.RedObjects[i]->mColorHighlight);
+			Material mat = mPieceMat;
+			XMVECTOR color = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+			color = XMLoadFloat4(&mat.Ambient);
+			color += XMLoadFloat4(&objects.BoardObjects[i]->mColorBase);
+			color += XMLoadFloat4(&objects.BoardObjects[i]->mColorHighlight);
+			XMStoreFloat4(&mat.Ambient, color);
+			// color = XMLoadFloat4(&objects.RedObjects[i]->mColorBase);
+			// colorHighlight = XMLoadFloat4(&objects.RedObjects[i]->mColorHighlight);
 
 			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
-			mFXColorBase->SetFloatVector(reinterpret_cast<float*>(& color));
-			mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(& colorHighlight));
-			mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(& colorRandom));
+			mFXMaterial->SetRawValue(&mat, 0, sizeof(mat));
+
+			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(& color));
+			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(& colorHighlight));
+			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(& colorRandom));
 
 			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 			md3dImmediateContext->DrawIndexed(currIndexCount, currIndexOffset, currVertexOffset);
@@ -866,7 +938,8 @@ void RenderTarget::BuildBlankBuffer()
 	{
 		bufferFile >> vertices[i].Pos.x >> vertices[i].Pos.y;
 		vertices[i].Pos.z = 0.0f;
-		vertices[i].Color = reinterpret_cast<float*>(&white);
+		vertices[i].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+		//vertices[i].Color = reinterpret_cast<float*>(&white);
 	}
 
 	D3D11_BUFFER_DESC bd;
@@ -969,49 +1042,48 @@ void RenderTarget::BuildGeometryBuffers()
 
 	std::vector<Vertex> verticies(totalVertexCount);
 
-	XMFLOAT4 black(0.0f, 0.0f, 0.0f, 0.0f);
 
 	UINT k = 0;
 	for(UINT i = 0; i < Board.Vertices.size(); ++i, ++k)
 	{
 		verticies[k].Pos = Board.Vertices[i].Position;
-		verticies[k].Color = black;
+		verticies[k].Normal = Board.Vertices[i].Normal;
 	}
 
 	for(UINT i = 0; i < King.Vertices.size(); ++i, ++k)
 	{
 		verticies[k].Pos = King.Vertices[i].Position;
-		verticies[k].Color = black;
+		verticies[k].Normal = King.Vertices[i].Normal;
 	}
 
 	for(UINT i = 0; i < Queen.Vertices.size(); ++i, ++k)
 	{
 		verticies[k].Pos = Queen.Vertices[i].Position;
-		verticies[k].Color = black;
+		verticies[k].Normal = Queen.Vertices[i].Normal;
 	}
 
 	for (UINT i = 0; i < Knight.Vertices.size(); ++i, ++k)
 	{
 		verticies[k].Pos = Knight.Vertices[i].Position;
-		verticies[k].Color = black;
+		verticies[k].Normal = Knight.Vertices[i].Normal;
 	}
 
 	for (UINT i = 0; i < Bishop.Vertices.size(); ++i, ++k)
 	{
 		verticies[k].Pos = Bishop.Vertices[i].Position;
-		verticies[k].Color = black;
+		verticies[k].Normal = Bishop.Vertices[i].Normal;
 	}
 
 	for (UINT i = 0; i < Rook.Vertices.size(); ++i, ++k)
 	{
 		verticies[k].Pos = Rook.Vertices[i].Position;
-		verticies[k].Color = black;
+		verticies[k].Normal = Rook.Vertices[i].Normal;
 	}
 
 	for (UINT i = 0; i < Pawn.Vertices.size(); ++i, ++k)
 	{
 		verticies[k].Pos = Pawn.Vertices[i].Position;
-		verticies[k].Color = black;
+		verticies[k].Normal = Pawn.Vertices[i].Normal;
 	}
 
 	D3D11_BUFFER_DESC vbd;
@@ -1053,12 +1125,12 @@ void RenderTarget::BuildGeometryBuffers()
 	//************************
 
 	Vertex debugVertices[6];
-	debugVertices[0] = Vertex(XMFLOAT3(-50.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-	debugVertices[1] = Vertex(XMFLOAT3(50.0f, 0.0f, 0.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-	debugVertices[2] = Vertex(XMFLOAT3(0.0f, -50.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
-	debugVertices[3] = Vertex(XMFLOAT3(0.0f, 50.0f, 0.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
-	debugVertices[4] = Vertex(XMFLOAT3(0.0f, 0.0f, -50.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
-	debugVertices[5] = Vertex(XMFLOAT3(0.0f, 0.0f, 50.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f));
+	debugVertices[0] = Vertex(XMFLOAT3(-50.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
+	debugVertices[1] = Vertex(XMFLOAT3(50.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
+	debugVertices[2] = Vertex(XMFLOAT3(0.0f, -50.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
+	debugVertices[3] = Vertex(XMFLOAT3(0.0f, 50.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
+	debugVertices[4] = Vertex(XMFLOAT3(0.0f, 0.0f, -50.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
+	debugVertices[5] = Vertex(XMFLOAT3(0.0f, 0.0f, 50.0f), XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	UINT debugIndices[] =
 	{
@@ -1304,12 +1376,13 @@ void RenderTarget::BuildMenuBuffers()
 	UINT indexCount = mMenuMesh.Indices.size();
 	mMenuBoxVertexOffset = 0;
 
-	XMVECTOR white = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	// XMVECTOR white = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 	std::vector<Vertex> vertices(vertexCount);
 	for (UINT i = 0; i < vertexCount; ++i)
 	{
 		vertices[i].Pos = mMenuMesh.Vertices[i].Pos;
-		vertices[i].Color = reinterpret_cast<float*>(&white);
+		vertices[i].Normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+		// vertices[i].Color = reinterpret_cast<float*>(&white);
 	}
 
 
@@ -1343,14 +1416,14 @@ void RenderTarget::BuildFX()
 
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
-	HRESULT hr = D3DX11CompileFromFile(L"FX/Basic.fx", 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	HRESULT hr = D3DX11CompileFromFile(L"FX/Lighting.fx", 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
 
 	if (compilationMsgs != 0)
 	{
 		MessageBoxA(0, reinterpret_cast<char*>(compilationMsgs->GetBufferPointer()), 0, 0);
 		ReleaseCOM(compilationMsgs);
 	}
-
+	
 	if (FAILED(hr))
 	{
 		DXTrace(__FILE__, (DWORD)__LINE__, hr, L"D3DX11compilefromfile", true);
@@ -1361,11 +1434,18 @@ void RenderTarget::BuildFX()
 
 	ReleaseCOM(compiledShader);
 
-	mTech = mFX->GetTechniqueByName("ColorTech");
-	mFXWorldViewProj = mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
-	mFXColorBase = mFX->GetVariableByName("gColorBase")->AsVector();
-	mFXColorSpecial = mFX->GetVariableByName("gColorSpecial")->AsVector();
-	mFXColorRandom = mFX->GetVariableByName("gColorRandom")->AsVector();
+	mTech				= mFX->GetTechniqueByName("LightTech");
+	mFXWorldViewProj	= mFX->GetVariableByName("gWorldViewProj")->AsMatrix();
+	mFXWorld			= mFX->GetVariableByName("gWorld")->AsMatrix();
+	mFXWorldInvTranspose = mFX->GetVariableByName("gWorldInvTranspose")->AsMatrix();
+	mFXEyePosW			= mFX->GetVariableByName("gEyePosW")->AsVector();
+	mFXDirLight			= mFX->GetVariableByName("gDirLight");
+	mFXPointLight		= mFX->GetVariableByName("gPointLight");
+	mFXSpotLight		= mFX->GetVariableByName("gSpotLight");
+	mFXMaterial			= mFX->GetVariableByName("gMaterial");
+	// mFXColorBase		= mFX->GetVariableByName("gColorBase")->AsVector();
+	// mFXColorSpecial		= mFX->GetVariableByName("gColorSpecial")->AsVector();
+	
 };
 
 void RenderTarget::BuildVertexLayout()
@@ -1373,7 +1453,7 @@ void RenderTarget::BuildVertexLayout()
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0}
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0} // TODO: Try 12
 	};	
 
 	D3DX11_PASS_DESC passDesc;
@@ -1412,21 +1492,8 @@ void RenderTarget::BuildBoxExtents(GeometryGenerator::MeshData& meshData, XNA::A
 GameView::GameView(QuickDef::Player faction)
 	: mSelected(0), mPhi(0.25f * XM_PI), mTheta(1.5f * XM_PI + (XM_PI * faction)), mRadius(20.0f), mFaction(faction)//fix mPhi for player faction
 {
-	float x = mRadius*sinf(mPhi)*cosf(mTheta);
-	float y = mRadius*cosf(mPhi);
-	float z = mRadius*sinf(mPhi)*sinf(mTheta);
-
 	XMStoreFloat4(&mViewDisplace, XMVectorSet(3.5f, 0.0f, 3.5f, 0.0f));
-	XMVECTOR displace = XMLoadFloat4(&mViewDisplace);
-
-	XMVECTOR pos = XMVectorSet(x, y, x, 1.0f);
-	pos += displace;
-
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR target = XMVectorSet(3.5f, 0.0f, 3.5f, 1.0f);
-
-	XMMATRIX v = XMMatrixLookAtLH(pos, target, up);
-	XMStoreFloat4x4(&mViewProj, v);
+	UpdateViewProjection();
 };
 
 GameView::~GameView()
@@ -1479,7 +1546,7 @@ void GameView::MouseInput(UINT msg, WPARAM btnState, int x, int y)
 void GameView::Frame(ObjectInfo& objects)
 {
 	UpdateViewProjection();
-	mRenderTarget->UpdateScene(0.0f, reinterpret_cast<float*>(&mViewProj));
+	mRenderTarget->UpdateScene(0.0f, XMLoadFloat4(&mEyePosW), reinterpret_cast<float*>(&mViewProj));
 	mRenderTarget->DrawScene(objects);
 };
 
@@ -1622,9 +1689,10 @@ void GameView::UpdateViewProjection()
 
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	XMVECTOR target = XMVectorSet(3.5f, 0.0f, 3.5f, 1.0f);
-
+	// TODO: Fix viewpoj vs view?
 	XMMATRIX v = XMMatrixLookAtLH(pos, target, up);
 	XMStoreFloat4x4(&mViewProj, v);
+	XMStoreFloat4(&mEyePosW, pos);
 };
 
 bool GameView::SendEvent(Event& data)
@@ -1820,7 +1888,7 @@ void PlayerView::OnMouseMove(WPARAM btnState, int x, int y)
 
 		//clamp?
 	}
-
+	// TODO: Remove code and related code
 	else if ( false && (btnState & MK_LBUTTON) )
 	{
 		int dx = x - mLastDrawPos.x;

@@ -25,7 +25,7 @@ struct VertexIn
 struct VertexOut
 {
 	float4 PosH		: SV_POSITION;
-	float3 PowW		: POSITION;
+	float3 PosW		: POSITION;
 	float3 NormalW	: NORMAL;
 };
 
@@ -38,7 +38,7 @@ VertexOut VS(VertexIn vin)
 	vout.NormalW = mul(vin.NormalL, (float3x3)gWorldInvTranspose);
 
 	// Transform to homogeneous clip space
-	vout.PosH = mul(float4(cin.PosL, 1.0f), gworldViewProj);
+	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 
 	return vout;
 }
@@ -57,26 +57,26 @@ float4 PS(VertexOut pin) : SV_Target
 	// Sum the light contribution from each light source
 	float4 A, D, S;
 
-	ComputeDirectionalLight(gMatieral, gDirLight, pin.NormalW, toEyeW, A, D, S);
+	//ComputeDirectionalLight(gMaterial, gDirLight, pin.NormalW, toEyeW, A, D, S);
+	//ambient += A;
+	//diffuse += D;
+	//spec += S;
+
+	ComputePointLight(gMaterial, gPointLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;
 	diffuse += D;
 	spec += S;
 
-	ComputePointLight(gMaterial, gPointLight, pin.PosW, pin.NormalW, toeyeW, A, D, S);
-	ambient += A;
-	diffuse += D;
-	spec += S;
-
-	ComputeSpotLight(gMaterial, gSpotLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
-	ambient += A;
-	diffuse += D;
-	spec += S;
+	//ComputeSpotLight(gMaterial, gSpotLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
+	//ambient += A;
+	//diffuse += D;
+	//spec += S;
 
 	float4 litColor = ambient + diffuse + spec;
 
 	// Common to take alpha from diffuse material
-	litColor.a = gMaterial.diffuse.a;
-
+	litColor.a = gMaterial.Diffuse.a;
+	//litColor += float4(10000.8f, 0.8f, 0.8f, 0.5f);
 	return litColor;
 }
 
@@ -84,8 +84,8 @@ technique11 LightTech
 {
 	pass P0
 	{
-		SetVertexShader(CompileShader(vs_5_0, VS()));
+		SetVertexShader(CompileShader(vs_4_0, VS()));
 		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_5_0, PS()));
-	};
-};
+		SetPixelShader(CompileShader(ps_4_0, PS()));
+	}
+}

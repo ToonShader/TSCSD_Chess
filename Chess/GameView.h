@@ -3,6 +3,7 @@
 #include "702/702_Create.h"
 #include "Objects.h"
 #include "GameLogic.h"
+#include "LightHelper.h"
 #include "xnacollision.h"
 #include "GeometryGenerator.h"
 
@@ -11,10 +12,10 @@ class GameLogic;
 struct Vertex
 {
 	Vertex();
-	Vertex(XMFLOAT3 pos, XMFLOAT4 color);
+	Vertex(XMFLOAT3 pos, XMFLOAT3 normal);
 	Vertex(const GeometryGenerator::Vertex& other);
 	XMFLOAT3 Pos;
-	XMFLOAT4 Color;
+	XMFLOAT3 Normal;
 };
 
 struct Mesh
@@ -41,7 +42,7 @@ public:
 	void SetViewProjection(CXMMATRIX viewProj);
 
 	Object* ObjectPick(int sx, int sy, CXMMATRIX view, ObjectInfo& objects);
-	void UpdateScene(float deltaTime, CXMMATRIX viewProj);
+	void UpdateScene(float deltaTime, CXMVECTOR eyePos, CXMMATRIX viewProj);
 	void DrawScene(ObjectInfo& objects);
 
 private:
@@ -194,9 +195,16 @@ private:
 	ID3DX11Effect* mFX;
 	ID3DX11EffectTechnique* mTech;
 	ID3DX11EffectMatrixVariable* mFXWorldViewProj;
-	ID3DX11EffectVectorVariable* mFXColorBase;
-	ID3DX11EffectVectorVariable* mFXColorSpecial;
-	ID3DX11EffectVectorVariable* mFXColorRandom;
+	ID3DX11EffectMatrixVariable* mFXWorld;
+	ID3DX11EffectMatrixVariable* mFXWorldInvTranspose;
+	//ID3DX11EffectVectorVariable* mFXColorBase;
+	//ID3DX11EffectVectorVariable* mFXColorSpecial;
+	ID3DX11EffectVectorVariable* mFXEyePosW;
+	ID3DX11EffectVariable* mFXDirLight;
+	ID3DX11EffectVariable* mFXPointLight;
+	ID3DX11EffectVariable* mFXSpotLight;
+	ID3DX11EffectVariable* mFXMaterial;
+
 
 	GameLogic* mGameLogic;
 
@@ -209,9 +217,19 @@ private:
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProj;
 
-	XMFLOAT4 mColorBlack;
-	XMFLOAT4 mColorRed;
+	// XMFLOAT4 mColorBlack;
+	// XMFLOAT4 mColorRed;
 	XMFLOAT4 mColorHighlight;
+	XMFLOAT4 mEyePosW;
+
+	DirectionalLight mDirLight;
+	PointLight mPointLight;
+	SpotLight mSpotLight;
+
+	Material mPieceMat;
+	Material mBoardMat;
+	Material mMenuMat;
+
 };
 
 class GameView
@@ -262,6 +280,7 @@ protected:
 	float mPhi;
 	float mTheta;
 	float mRadius;
+	XMFLOAT4 mEyePosW;
 
 	XMFLOAT4X4 mViewProj;
 	XMFLOAT4 mViewDisplace;
