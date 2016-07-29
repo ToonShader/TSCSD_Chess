@@ -33,6 +33,7 @@
 #include <algorithm>
 #include <fstream>
 #include <vector>
+#include "MathHelper.h"
 
 
 #if defined(DEBUG) | defined(_DEBUG)
