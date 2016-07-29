@@ -45,43 +45,43 @@ RenderTarget::RenderTarget(HINSTANCE hInstance, GameLogic& gameLogic)
 		XMStoreFloat4x4 (&mView, I);
 		XMStoreFloat4x4 (&mProj, I);
 		
-		// XMStoreFloat4(&mColorBlack, XMVectorSet(0.1f, 0.1f, 0.1f, 0.0f));
-		// XMStoreFloat4(&mColorRed, XMVectorSet(0.9f, 0.1f, 0.1f, 0.0f));
 		XMStoreFloat4(&mColorHighlight, XMVectorSet(0.0f, 0.2f, 0.2f, 0.0f));
 		XMStoreFloat4(&mEyePosW, XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f));
 		SetMenuLevel(MenuDef::Main);
 
 		XMFLOAT4 EmptyColor(0.0f, 0.0f, 0.0f, 1.0f);
 		XMVECTOR lPos = XMVectorSet(9.0f, 5.0f, 3.5f, 1.0f);
+		XMVECTOR l2Pos = XMVectorSet(-9.0f, 6.0f, 3.5f, 1.0f);
 		XMVECTOR bMid = XMVectorSet(3.5f, 0.0f, 3.5f, 1.0f);
 
-		mDirLight.Ambient = EmptyColor;
-		mDirLight.Diffuse = EmptyColor;
-		mDirLight.Specular = EmptyColor;
-		XMStoreFloat3(&mDirLight.Direction, XMVector3Normalize(bMid - lPos));
+		mDirLight.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+		mDirLight.Diffuse = XMFLOAT4(1.5f, 1.5f, 1.5f, 1.0f);
+		mDirLight.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+		XMStoreFloat3(&mDirLight.Direction, XMVector3Normalize(bMid - l2Pos));
 
-		mPointLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		mPointLight.Diffuse = XMFLOAT4(500.7f, 500.7f, 500.7f, 1.0f);
-		mPointLight.Specular = XMFLOAT4(100.7f, 100.7f, 100.7f, 1.0f);
-		mPointLight.Att = XMFLOAT3(1.0f, 1.0f, 1.0f);
-		mPointLight.Range = 100.0f;
+		XMStoreFloat3(&mPointLight.Position, lPos);
+		mPointLight.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+		mPointLight.Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+		mPointLight.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+		mPointLight.Att = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		mPointLight.Range = 1000.0f;
 
 		mSpotLight.Ambient = EmptyColor;
 		mSpotLight.Diffuse = EmptyColor;
 		mSpotLight.Specular = EmptyColor;
-		mSpotLight.Att = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		mSpotLight.Att = XMFLOAT3(1.0f, 1.0f, 0.0f);
 		mSpotLight.SpotFactor = 96.0f;
 		mSpotLight.Range = 10000.0f;
 
-		mPieceMat.Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-		mPieceMat.Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		mPieceMat.Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 16.0f);
+		mPieceMat.Ambient = XMFLOAT4(0.45f, 0.45f, 0.45f, 1.0f);
+		mPieceMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		mPieceMat.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 64.0f);
 
-		mBoardMat.Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-		mBoardMat.Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-		mBoardMat.Specular = XMFLOAT4(0.15f, 0.15f, 0.15f, 16.0f);
+		mBoardMat.Ambient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+		mBoardMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		mBoardMat.Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 16.0f);
 
-		mMenuMat.Ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		mMenuMat.Ambient = XMFLOAT4(1000.0f, 1000.0f, 1000.0f, 1.0f);
 		mMenuMat.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		mMenuMat.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -420,7 +420,7 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 	assert(mSwapChain);
 	assert(md3dImmediateContext);
 	
-	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Blue));
+	md3dImmediateContext->ClearRenderTargetView(mRenderTargetView, reinterpret_cast<const float*>(&Colors::Black));
 	md3dImmediateContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	// TODO: Determine: must it be set each call?
 	md3dImmediateContext->IASetInputLayout(mInputLayout);
@@ -452,9 +452,6 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 	for (UINT p = 0; p < techDesc.Passes; ++p)// TODO: Learn: can a float 4x4 be used to fill worldviewproj->setmatrix
 	{
 		XMMATRIX world = XMMatrixIdentity();
-		// XMVECTOR color = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
-		// XMVECTOR colorHighlight = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-		// XMVECTOR colorRandom = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
 
 		if (mMenued)
 		{
@@ -462,9 +459,6 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			md3dImmediateContext->IASetIndexBuffer(mMenuIndexBuffer, DXGI_FORMAT_R32_UINT, offset);
 			md3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
-			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&(color)));
-			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&(colorHighlight)));
-			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&(colorRandom)));
 			mFXMaterial->SetRawValue(&mMenuMat, 0, sizeof(mMenuMat));
 
 			for (UINT i = 0; i < mMenuListCount; ++i)
@@ -475,12 +469,16 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 				GetDrawInfo(currVertexOffset, currIndexOffset, currIndexCount, 0, mMenuList[i]);
 
 				world = mMenuList[i]->GetWorldTransform();
+				mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+				mFXWorldInvTranspose->SetMatrix(reinterpret_cast<float*>(&MathHelper::InverseTranspose(world)));
 				mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world)));
 
 				mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 				md3dImmediateContext->DrawIndexed(currIndexCount, currIndexOffset, currVertexOffset);
 
 				world._42 += 0.75f;
+				mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+				mFXWorldInvTranspose->SetMatrix(reinterpret_cast<float*>(&MathHelper::InverseTranspose(world)));
 				mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world)));
 				mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 				md3dImmediateContext->DrawIndexed(mMenuBoxIndexCount, mMenuBoxIndexOffset, mMenuBoxVertexOffset);
@@ -494,37 +492,31 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 		md3dImmediateContext->IASetVertexBuffers(0, 1, &mDebugVertexBuffer, &stride, &offset);
 		md3dImmediateContext->IASetIndexBuffer(mDebugIndexBuffer, DXGI_FORMAT_R32_UINT, offset);
 
-		world = XMMatrixTranslation(-0.5f, 0.0f, -0.5f);
+		world = XMMatrixTranslation(9.0f, 5.0f, 3.5f);
 
+		mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+		mFXWorldInvTranspose->SetMatrix(reinterpret_cast<float*>(&MathHelper::InverseTranspose(world)));
 		mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
 
 		Material debugMat;
-		debugMat.Ambient = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+		debugMat.Ambient = XMFLOAT4(1000.0f, 0.0f, 0.0f, 1.0f);
 		debugMat.Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 		debugMat.Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 		debugMat.Reflect = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 
 		mFXMaterial->SetRawValue(&debugMat, 0, sizeof(debugMat));
-		// color = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-		// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
-		// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&colorHighlight));
-		// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&colorRandom));
 
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(2, 0, 0);
 
-		debugMat.Ambient = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+		debugMat.Ambient = XMFLOAT4(0.0f, 1000.0f, 0.0f, 0.0f);
 		mFXMaterial->SetRawValue(&debugMat, 0, sizeof(debugMat));
-		//color = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		//mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
 
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(2, 2, 0);
 
-		debugMat.Ambient = XMFLOAT4(0.0f, 0.0f, 1.0f, 0.0f);
+		debugMat.Ambient = XMFLOAT4(0.0f, 0.0f, 1000.0f, 0.0f);
 		mFXMaterial->SetRawValue(&debugMat, 0, sizeof(debugMat));
-		//color = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-		//mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
 
 		mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 		md3dImmediateContext->DrawIndexed(2, 4, 0);
@@ -541,18 +533,17 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			world = XMLoadFloat4x4(& objects.BoardObjects[i]->GetWorldTransform()); //possible issue using a return
 			Material mat = mBoardMat;
 			XMVECTOR color = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-			color = XMLoadFloat4(&mat.Ambient);
-			color += XMLoadFloat4(& objects.BoardObjects[i]->mColorBase);
-			color += XMLoadFloat4(& objects.BoardObjects[i]->mColorHighlight);
-			XMStoreFloat4(&mat.Ambient, color);
+			color += XMLoadFloat4(&objects.BoardObjects[i]->mColorBase);
+			color += XMLoadFloat4(&objects.BoardObjects[i]->mColorHighlight);
+			XMStoreFloat4(&mat.Ambient, color * XMLoadFloat4(&mat.Ambient));
+			XMStoreFloat4(&mat.Diffuse, color * XMLoadFloat4(&mat.Diffuse));
+			//XMStoreFloat4(&mat.Specular, color * XMLoadFloat4(&mat.Specular));
 
-			// colorHighlight = 
 
+			mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+			mFXWorldInvTranspose->SetMatrix(reinterpret_cast<float*>(&MathHelper::InverseTranspose(world)));
 			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
 			mFXMaterial->SetRawValue(&mat, 0, sizeof(mat));
-			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(&color));
-			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(&colorHighlight));
-			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(&colorRandom));
 
 			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 			md3dImmediateContext->DrawIndexed(mBoardIndexCount, mBoardIndexOffset, mBoardVertexOffset);
@@ -569,19 +560,16 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			world = XMLoadFloat4x4(& objects.BlackObjects[i]->GetWorldTransform());
 			Material mat = mPieceMat;
 			XMVECTOR color = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-			color = XMLoadFloat4(&mat.Ambient);
 			color += XMLoadFloat4(&objects.BlackObjects[i]->mColorBase);
 			color += XMLoadFloat4(&objects.BlackObjects[i]->mColorHighlight);
-			XMStoreFloat4(&mat.Ambient, color);
-			// color = XMLoadFloat4(& objects.BlackObjects[i]->mColorBase);
-			// colorHighlight = XMLoadFloat4(& objects.BlackObjects[i]->mColorHighlight);
+			XMStoreFloat4(&mat.Ambient, color * XMLoadFloat4(&mat.Ambient));
+			XMStoreFloat4(&mat.Diffuse, color * XMLoadFloat4(&mat.Diffuse));
+			//XMStoreFloat4(&mat.Specular, color * XMLoadFloat4(&mat.Specular));
 
+			mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+			mFXWorldInvTranspose->SetMatrix(reinterpret_cast<float*>(&MathHelper::InverseTranspose(world)));
 			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
 			mFXMaterial->SetRawValue(&mat, 0, sizeof(mat));
-
-			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(& color));
-			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(& colorHighlight));
-			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(& colorRandom));
 
 			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 			md3dImmediateContext->DrawIndexed(currIndexCount, currIndexOffset, currVertexOffset);
@@ -598,19 +586,16 @@ void RenderTarget::DrawScene(ObjectInfo& objects)
 			world = XMLoadFloat4x4(&objects.RedObjects[i]->GetWorldTransform());
 			Material mat = mPieceMat;
 			XMVECTOR color = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
-			color = XMLoadFloat4(&mat.Ambient);
-			color += XMLoadFloat4(&objects.BoardObjects[i]->mColorBase);
-			color += XMLoadFloat4(&objects.BoardObjects[i]->mColorHighlight);
-			XMStoreFloat4(&mat.Ambient, color);
-			// color = XMLoadFloat4(&objects.RedObjects[i]->mColorBase);
-			// colorHighlight = XMLoadFloat4(&objects.RedObjects[i]->mColorHighlight);
+			color += XMLoadFloat4(&objects.RedObjects[i]->mColorBase);
+			color += XMLoadFloat4(&objects.RedObjects[i]->mColorHighlight);
+			XMStoreFloat4(&mat.Ambient, color * XMLoadFloat4(&mat.Ambient));
+			XMStoreFloat4(&mat.Diffuse, color * XMLoadFloat4(&mat.Diffuse));
+			//XMStoreFloat4(&mat.Specular, color * XMLoadFloat4(&mat.Specular));
 
+			mFXWorld->SetMatrix(reinterpret_cast<float*>(&world));
+			mFXWorldInvTranspose->SetMatrix(reinterpret_cast<float*>(&MathHelper::InverseTranspose(world)));
 			mFXWorldViewProj->SetMatrix(reinterpret_cast<float*>(&(world * viewProj)));
 			mFXMaterial->SetRawValue(&mat, 0, sizeof(mat));
-
-			// mFXColorBase->SetFloatVector(reinterpret_cast<float*>(& color));
-			// mFXColorSpecial->SetFloatVector(reinterpret_cast<float*>(& colorHighlight));
-			// mFXColorRandom->SetFloatVector(reinterpret_cast<float*>(& colorRandom));
 
 			mTech->GetPassByIndex(p)->Apply(0, md3dImmediateContext);
 			md3dImmediateContext->DrawIndexed(currIndexCount, currIndexOffset, currVertexOffset);

@@ -112,7 +112,7 @@ void ComputePointLight(Material mat, PointLight L, float3 pos, float3 normal, fl
 		float3 v = reflect(-lightVec, normal);
 		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
 
-		diffuse = float4(10.0f, 0.0f, 0.0f, 0.0f); //diffuseFactor * mat.Diffuse * L.Diffuse;
+		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
 		spec = specFactor * mat.Specular * L.Specular;
 	}
 

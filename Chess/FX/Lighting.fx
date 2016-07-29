@@ -57,26 +57,26 @@ float4 PS(VertexOut pin) : SV_Target
 	// Sum the light contribution from each light source
 	float4 A, D, S;
 
-	//ComputeDirectionalLight(gMaterial, gDirLight, pin.NormalW, toEyeW, A, D, S);
-	//ambient += A;
-	//diffuse += D;
-	//spec += S;
+	ComputeDirectionalLight(gMaterial, gDirLight, pin.NormalW, toEyeW, A, D, S);
+	ambient += A;
+	diffuse += D;
+	spec += S;
 
 	ComputePointLight(gMaterial, gPointLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;
 	diffuse += D;
 	spec += S;
 
-	//ComputeSpotLight(gMaterial, gSpotLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
-	//ambient += A;
-	//diffuse += D;
-	//spec += S;
+	ComputeSpotLight(gMaterial, gSpotLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
+	ambient += A;
+	diffuse += D;
+	spec += S;
 
 	float4 litColor = ambient + diffuse + spec;
 
 	// Common to take alpha from diffuse material
 	litColor.a = gMaterial.Diffuse.a;
-	//litColor += float4(10000.8f, 0.8f, 0.8f, 0.5f);
+
 	return litColor;
 }
 
