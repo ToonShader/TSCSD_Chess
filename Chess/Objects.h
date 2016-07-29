@@ -1,5 +1,4 @@
-#ifndef OBJECTS
-#define OBJECTS
+#pragma once
 
 #include "702/702_Util.h"
 #include "Common.h"
@@ -158,8 +157,3 @@ public:
 
 	void Draw(ID3D11DeviceContext* immediateContext);
 };
-
-
-
-
-#endif

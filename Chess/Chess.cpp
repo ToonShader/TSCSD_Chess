@@ -69,7 +69,8 @@ bool Chess::Init()
 	mPlayerViews[0]->AttachGameLogic(mGameLogic);
 
 	mRenderTarget = new RenderTarget(mhInstance, *mGameLogic);
-	mRenderTarget->Init();
+	if (!mRenderTarget->Init())
+		return false;
 	mPlayerViews[0]->SetRenderTarget(mRenderTarget);
 
 	return true;

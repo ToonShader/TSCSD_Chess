@@ -1,5 +1,4 @@
-#ifndef CHESS
-#define CHESS
+#pragma once
 
 #include "GameView.h"
 
@@ -28,4 +27,3 @@ private:
 	GameView* mReplayView;
 	RenderTarget* mRenderTarget;
 };
-#endif

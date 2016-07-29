@@ -78,28 +78,34 @@
     <ClInclude Include="702\702_Create.h" />
     <ClInclude Include="702\702_Util.h" />
     <ClInclude Include="702\GameTimer.h" />
+    <ClInclude Include="702\MathHelper.h" />
     <ClInclude Include="Chess.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="GameLogic.h" />
     <ClInclude Include="GameView.h" />
     <ClInclude Include="GeometryGenerator.h" />
+    <ClInclude Include="LightHelper.h" />
     <ClInclude Include="Objects.h" />
     <ClInclude Include="xnacollision.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="702\702_Create.cpp" />
     <ClCompile Include="702\GameTimer.cpp" />
+    <ClCompile Include="702\MathHelper.cpp" />
     <ClCompile Include="Chess.cpp" />
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="GameLogic.cpp" />
     <ClCompile Include="GameView.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
+    <ClCompile Include="Lighting.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Objects.cpp" />
     <ClCompile Include="xnacollision.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FX\Basic.fx" />
+    <None Include="FX\LightHelper.fx" />
+    <None Include="FX\Lighting.fx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

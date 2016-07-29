@@ -236,7 +236,7 @@ bool D3DAppControl::InitDirect3D()
 #endif
 
 	D3D_FEATURE_LEVEL featureLevel;
-	D3D_FEATURE_LEVEL input = D3D_FEATURE_LEVEL_11_0;
+	D3D_FEATURE_LEVEL input = D3D_FEATURE_LEVEL_10_0;
 	HRESULT hr = D3D11CreateDevice(0, md3dDriverType, 0, createDeviceFlags, &input, 1, D3D11_SDK_VERSION, &md3dDevice, &featureLevel, &md3dImmediateContext);
 
 	if (FAILED(hr))
@@ -244,7 +244,7 @@ bool D3DAppControl::InitDirect3D()
 		MessageBox(0, L"CreateDevice FAILED", 0, 0);
 		return false;
 	}
-	if ( featureLevel != D3D_FEATURE_LEVEL_11_0)
+	if ( featureLevel != D3D_FEATURE_LEVEL_10_0)
 	{
 		MessageBox(0, L"D3D11 Not Supported", 0, 0);
 		return false;

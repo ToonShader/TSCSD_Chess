@@ -1,5 +1,4 @@
-#ifndef GAMELOGIC
-#define GAMELOGIC
+#pragma once
 
 #include "GameView.h"
 
@@ -44,6 +43,3 @@ private:
 	QuickDef::Player mLastPlayer;
 	bool mReplay;
 };
-
-
-#endif

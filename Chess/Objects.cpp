@@ -20,7 +20,7 @@ Object::Object(QuickDef::Player player, QuickDef::MoveType moveType, QuickDef::T
 
 	if (mFaction == QuickDef::Red)
 	{
-		XMVECTOR color = XMVectorSet(0.851f, 0.687f, 0.386f, 1.0f);
+		XMVECTOR color = XMVectorSet(0.5106f, 0.4122f, 0.2316f, 1.0f);
 		XMStoreFloat4(&mColorBase, color);
 	}
 	else
