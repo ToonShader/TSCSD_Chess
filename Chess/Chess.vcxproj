@@ -78,6 +78,7 @@
     <ClInclude Include="702\702_Create.h" />
     <ClInclude Include="702\702_Util.h" />
     <ClInclude Include="702\GameTimer.h" />
+    <ClInclude Include="702\MathHelper.h" />
     <ClInclude Include="Chess.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="GameLogic.h" />
@@ -90,6 +91,7 @@
   <ItemGroup>
     <ClCompile Include="702\702_Create.cpp" />
     <ClCompile Include="702\GameTimer.cpp" />
+    <ClCompile Include="702\MathHelper.cpp" />
     <ClCompile Include="Chess.cpp" />
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="GameLogic.cpp" />

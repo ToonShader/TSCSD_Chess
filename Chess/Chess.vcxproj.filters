@@ -54,6 +54,9 @@
     <ClInclude Include="LightHelper.h">
       <Filter>702</Filter>
     </ClInclude>
+    <ClInclude Include="702\MathHelper.h">
+      <Filter>702</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Chess.cpp">
@@ -87,6 +90,9 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
     <ClCompile Include="Lighting.cpp">
+      <Filter>702</Filter>
+    </ClCompile>
+    <ClCompile Include="702\MathHelper.cpp">
       <Filter>702</Filter>
     </ClCompile>
   </ItemGroup>
